@@ -1,0 +1,108 @@
+.page-header {
+  margin-bottom: 1.5rem;
+  h2 { font-size: 22px; font-weight: 600; }
+  .subtitle { font-size: 14px; color: #666; margin-top: 4px; }
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.phases { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.chip {
+  font-size: 13px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: transparent;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover { background: #f0f0f0; }
+  &.active { background: #111; color: #fff; border-color: #111; }
+}
+
+.search-input {
+  margin-left: auto;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  outline: none;
+  width: 200px;
+  &:focus { border-color: #888; }
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #999;
+  margin: 1.5rem 0 0.5rem;
+  .count { font-weight: 400; }
+}
+
+.match-card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  transition: border-color 0.15s;
+  &:hover { border-color: #bbb; }
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  &.away { justify-content: flex-end; text-align: right; }
+}
+
+.team-name { font-size: 14px; font-weight: 500; }
+
+.match-center { text-align: center; }
+
+.badge {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e8f0fe;
+  color: #1a56db;
+  margin-bottom: 3px;
+  font-weight: 500;
+}
+
+.match-date  { font-size: 11px; color: #aaa; }
+.match-vs    { font-size: 15px; font-weight: 600; color: #ccc; }
+.match-time  { font-size: 13px; font-weight: 500; }
+.match-venue { font-size: 11px; color: #aaa; margin-top: 2px; }
+
+.state-box {
+  text-align: center; padding: 3rem 1rem; color: #888; font-size: 14px;
+}
+
+.spinner {
+  width: 32px; height: 32px;
+  border: 2px solid #eee; border-top-color: #888;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-box {
+  background: #fee2e2; color: #991b1b;
+  border-radius: 12px; padding: 1rem 1.25rem; font-size: 14px;
+}

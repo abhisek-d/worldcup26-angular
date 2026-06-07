@@ -1,0 +1,38 @@
+<div class="page-header">
+  <h2>Teams</h2>
+  <p class="subtitle">All 48 qualified nations</p>
+</div>
+
+@if (loading) {
+  <div class="state-box"><div class="spinner"></div><p>Loading teams…</p></div>
+} @else if (error) {
+  <div class="error-box">{{ error }}</div>
+} @else {
+  <input
+    class="search-input"
+    type="text"
+    placeholder="Search team…"
+    [(ngModel)]="searchQuery"
+    (ngModelChange)="applyFilter()" />
+
+  <div class="teams-grid">
+    @for (t of filtered; track t.id ?? name(t)) {
+      <a [routerLink]="['/teams', name(t)]" class="team-card">
+        <div class="avatar">{{ name(t).charAt(0) }}</div>
+        <div class="team-info">
+          <div class="team-name">{{ name(t) }}</div>
+          <div class="team-meta">
+            @if (t.group) { <span>Group {{ t.group }}</span> }
+            @if (t.confederation) { <span> · {{ t.confederation }}</span> }
+            @if (t.fifa_rank) { <span> · FIFA #{{ t.fifa_rank }}</span> }
+          </div>
+        </div>
+        <span class="arrow">›</span>
+      </a>
+    }
+  </div>
+
+  @if (filtered.length === 0) {
+    <div class="state-box"><p>No teams found.</p></div>
+  }
+}

@@ -1,0 +1,47 @@
+<div class="page-header">
+  <h2>Groups</h2>
+  <p class="subtitle">12 groups — 4 teams each</p>
+</div>
+
+@if (loading) {
+  <div class="state-box"><div class="spinner"></div><p>Loading groups…</p></div>
+} @else if (error) {
+  <div class="error-box">{{ error }}</div>
+} @else {
+  <div class="groups-grid">
+    @for (g of groups; track g.id ?? $index) {
+      <div class="group-card">
+        <div class="group-title">Group {{ groupName(g) }}</div>
+
+        <ul class="team-list">
+          @for (team of teamNames(g); track team) {
+            <li><a [routerLink]="['/teams', team]" class="team-link">{{ team }}</a></li>
+          }
+        </ul>
+
+        @if (g.standings && g.standings.length) {
+          <table class="standings-table">
+            <thead>
+              <tr>
+                <th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of g.standings; track row.team) {
+                <tr>
+                  <td>{{ row.team }}</td>
+                  <td>{{ row.played ?? '-' }}</td>
+                  <td>{{ row.won ?? '-' }}</td>
+                  <td>{{ row.drawn ?? '-' }}</td>
+                  <td>{{ row.lost ?? '-' }}</td>
+                  <td>{{ row.goal_difference ?? '-' }}</td>
+                  <td class="pts">{{ row.points ?? '-' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    }
+  </div>
+}

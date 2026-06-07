@@ -1,0 +1,46 @@
+.page-header {
+  margin-bottom: 1.5rem;
+  h2 { font-size: 22px; font-weight: 600; }
+  .subtitle { font-size: 14px; color: #666; margin-top: 4px; }
+}
+
+.stadiums-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.stadium-card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  transition: border-color 0.15s;
+  &:hover { border-color: #bbb; }
+}
+
+.stadium-icon { font-size: 28px; flex-shrink: 0; }
+.stadium-name { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+.stadium-city { font-size: 13px; color: #888; margin-bottom: 8px; }
+
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #555;
+  font-weight: 500;
+}
+
+.state-box { text-align: center; padding: 3rem 1rem; color: #888; font-size: 14px; }
+.spinner {
+  width: 32px; height: 32px;
+  border: 2px solid #eee; border-top-color: #888;
+  border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-box { background: #fee2e2; color: #991b1b; border-radius: 12px; padding: 1rem 1.25rem; font-size: 14px; }

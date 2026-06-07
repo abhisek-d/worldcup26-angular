@@ -1,0 +1,44 @@
+<a routerLink="/teams" class="back-link">← Back to Teams</a>
+
+@if (loading) {
+  <div class="state-box"><div class="spinner"></div><p>Loading…</p></div>
+} @else if (error) {
+  <div class="error-box">{{ error }}</div>
+} @else if (team) {
+  <div class="detail-card">
+    <div class="team-hero">
+      <div class="avatar">{{ displayName.charAt(0) }}</div>
+      <div>
+        <h2>{{ displayName }}</h2>
+        @if (team.confederation) { <p class="meta">{{ team.confederation }}</p> }
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      @if (team.group) {
+        <div class="detail-item">
+          <span class="label">Group</span>
+          <span class="value">{{ team.group }}</span>
+        </div>
+      }
+      @if (team.fifa_rank) {
+        <div class="detail-item">
+          <span class="label">FIFA Rank</span>
+          <span class="value">#{{ team.fifa_rank }}</span>
+        </div>
+      }
+      @if (team.coach) {
+        <div class="detail-item">
+          <span class="label">Coach</span>
+          <span class="value">{{ team.coach }}</span>
+        </div>
+      }
+      @if (team.confederation) {
+        <div class="detail-item">
+          <span class="label">Confederation</span>
+          <span class="value">{{ team.confederation }}</span>
+        </div>
+      }
+    </div>
+  </div>
+}

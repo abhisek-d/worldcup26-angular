@@ -1,0 +1,55 @@
+<div class="page-header">
+  <h2>Fixtures</h2>
+  <p class="subtitle">All 104 matches — Group Stage to Final</p>
+</div>
+
+@if (loading) {
+  <div class="state-box">
+    <div class="spinner"></div>
+    <p>Loading fixtures…</p>
+  </div>
+} @else if (error) {
+  <div class="error-box">{{ error }}</div>
+} @else {
+  <div class="controls">
+    <div class="phases">
+      @for (ph of phases; track ph) {
+        <button class="chip" [class.active]="ph === activePhase" (click)="setPhase(ph)">
+          {{ ph }}
+        </button>
+      }
+    </div>
+    <input
+      class="search-input"
+      type="text"
+      placeholder="Search team or venue…"
+      [(ngModel)]="searchQuery"
+      (ngModelChange)="applyFilters()" />
+  </div>
+
+  @for (group of grouped; track group.phase) {
+    <div class="section-label">{{ group.phase }} <span class="count">({{ group.matches.length }})</span></div>
+
+    @for (m of group.matches; track m.id ?? $index) {
+      <div class="match-card">
+        <div class="team home">
+          <span class="team-name">{{ home(m) }}</span>
+        </div>
+        <div class="match-center">
+          @if (m.group) { <div class="badge">Group {{ m.group }}</div> }
+          <div class="match-date">{{ formatDate(dateRaw(m)) }}</div>
+          <div class="match-vs">vs</div>
+          <div class="match-time">{{ formatTime(dateRaw(m)) }}</div>
+          @if (venue(m)) { <div class="match-venue">📍 {{ venue(m) }}</div> }
+        </div>
+        <div class="team away">
+          <span class="team-name">{{ away(m) }}</span>
+        </div>
+      </div>
+    }
+  }
+
+  @if (grouped.length === 0) {
+    <div class="state-box"><p>No matches found.</p></div>
+  }
+}
