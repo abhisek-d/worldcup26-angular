@@ -1,6 +1,6 @@
 <div class="page-header">
   <h2>Fixtures</h2>
-  <p class="subtitle">All 104 matches — Group Stage to Final</p>
+  <p class="subtitle">All 104 matches — times shown in IST</p>
 </div>
 
 @if (loading) {
@@ -11,6 +11,7 @@
 } @else if (error) {
   <div class="error-box">{{ error }}</div>
 } @else {
+
   <div class="controls">
     <div class="phases">
       @for (ph of phases; track ph) {
@@ -22,29 +23,42 @@
     <input
       class="search-input"
       type="text"
-      placeholder="Search team or venue…"
+      placeholder="Search team…"
       [(ngModel)]="searchQuery"
       (ngModelChange)="applyFilters()" />
   </div>
 
   @for (group of grouped; track group.phase) {
-    <div class="section-label">{{ group.phase }} <span class="count">({{ group.matches.length }})</span></div>
+    <div class="section-label">
+      {{ group.phase }} <span class="count">({{ group.matches.length }})</span>
+    </div>
 
-    @for (m of group.matches; track m.id ?? $index) {
+    @for (m of group.matches; track m.id) {
       <div class="match-card">
-        <div class="team home">
-          <span class="team-name">{{ home(m) }}</span>
+
+        <!-- Teams -->
+        <div class="teams-col">
+          <span class="team-name home">{{ home(m) }}</span>
+          <span class="vs">vs</span>
+          <span class="team-name away">{{ away(m) }}</span>
         </div>
-        <div class="match-center">
-          @if (m.group) { <div class="badge">Group {{ m.group }}</div> }
-          <div class="match-date">{{ formatDate(dateRaw(m)) }}</div>
-          <div class="match-vs">vs</div>
-          <div class="match-time">{{ formatTime(dateRaw(m)) }}</div>
-          @if (venue(m)) { <div class="match-venue">📍 {{ venue(m) }}</div> }
+
+        <!-- Time in IST -->
+        <div class="time-col">
+          <div class="match-time">{{ toIST(m.local_date).time }}</div>
+          <div class="match-date">{{ toIST(m.local_date).date }}</div>
         </div>
-        <div class="team away">
-          <span class="team-name">{{ away(m) }}</span>
+
+        <!-- Group -->
+        <div class="group-col">
+          @if (m.group) {
+            <span class="group-badge">Group {{ m.group }}</span>
+          }
+          @if (m.matchday) {
+            <span class="matchday">MD {{ m.matchday }}</span>
+          }
         </div>
+
       </div>
     }
   }
