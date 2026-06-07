@@ -19,9 +19,9 @@ export class WorldcupService {
       : new HttpHeaders();
   }
 
-  getGames(): Observable<Match[]> {
-    // Public endpoint — no token needed
-    return this.http.get<Match[]>(`${this.BASE}/get/games`);
+  getGames(): Observable<any> {
+    // Returns { games: [...] }
+    return this.http.get<any>(`${this.BASE}/get/games`);
   }
 
   getTeams(): Observable<Team[]> {

@@ -3,67 +3,55 @@
   <p class="subtitle">All 104 matches — times shown in IST</p>
 </div>
 
-@if (loading) {
-  <div class="state-box">
-    <div class="spinner"></div>
-    <p>Loading fixtures…</p>
-  </div>
-} @else if (error) {
-  <div class="error-box">{{ error }}</div>
-} @else {
+<div *ngIf="loading" class="state-box">
+  <div class="spinner"></div>
+  <p>Loading fixtures…</p>
+</div>
 
+<div *ngIf="!loading && error" class="error-box">{{ error }}</div>
+
+<ng-container *ngIf="!loading && !error">
   <div class="controls">
     <div class="phases">
-      @for (ph of phases; track ph) {
-        <button class="chip" [class.active]="ph === activePhase" (click)="setPhase(ph)">
-          {{ ph }}
-        </button>
-      }
+      <button
+              *ngFor="let ph of phases"
+              class="chip"
+              [class.active]="ph === activePhase"
+              (click)="setPhase(ph)">
+        {{ ph }}
+      </button>
     </div>
     <input
-      class="search-input"
-      type="text"
-      placeholder="Search team…"
-      [(ngModel)]="searchQuery"
-      (ngModelChange)="applyFilters()" />
+            class="search-input"
+            type="text"
+            placeholder="Search team…"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="applyFilters()" />
   </div>
 
-  @for (group of grouped; track group.phase) {
+  <ng-container *ngFor="let group of grouped">
     <div class="section-label">
       {{ group.phase }} <span class="count">({{ group.matches.length }})</span>
     </div>
 
-    @for (m of group.matches; track m.id) {
-      <div class="match-card">
-
-        <!-- Teams -->
-        <div class="teams-col">
-          <span class="team-name home">{{ home(m) }}</span>
-          <span class="vs">vs</span>
-          <span class="team-name away">{{ away(m) }}</span>
-        </div>
-
-        <!-- Time in IST -->
-        <div class="time-col">
-          <div class="match-time">{{ toIST(m.local_date).time }}</div>
-          <div class="match-date">{{ toIST(m.local_date).date }}</div>
-        </div>
-
-        <!-- Group -->
-        <div class="group-col">
-          @if (m.group) {
-            <span class="group-badge">Group {{ m.group }}</span>
-          }
-          @if (m.matchday) {
-            <span class="matchday">MD {{ m.matchday }}</span>
-          }
-        </div>
-
+    <div *ngFor="let m of group.matches" class="match-card">
+      <div class="teams-col">
+        <span class="team-name home">{{ home(m) }}</span>
+        <span class="vs">vs</span>
+        <span class="team-name away">{{ away(m) }}</span>
       </div>
-    }
-  }
+      <div class="time-col">
+        <div class="match-time">{{ toIST(m.local_date).time }}</div>
+        <div class="match-date">{{ toIST(m.local_date).date }}</div>
+      </div>
+      <div class="group-col">
+        <span *ngIf="m.group" class="group-badge">Group {{ m.group }}</span>
+        <span *ngIf="m.matchday" class="matchday">MD {{ m.matchday }}</span>
+      </div>
+    </div>
+  </ng-container>
 
-  @if (grouped.length === 0) {
-    <div class="state-box"><p>No matches found.</p></div>
-  }
-}
+  <div *ngIf="grouped.length === 0" class="state-box">
+    <p>No matches found.</p>
+  </div>
+</ng-container>
