@@ -64,7 +64,7 @@ export class FixturesComponent implements OnInit {
     const [hour, minute] = timePart.split(':');
     const utc = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute)));
     if (isNaN(utc.getTime())) return { date: local_date, time: '' };
-    const ist = new Date(utc.getTime() + 5.5 * 60 * 60 * 1000);
+    const ist = new Date(utc.getTime() + 11.5 * 60 * 60 * 1000);
     const date = ist.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
     const time = ist.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' IST';
     return { date, time };
