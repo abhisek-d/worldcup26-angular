@@ -1,34 +1,34 @@
 <div class="page-header">
-  <h2>Teams</h2>
-  <p class="subtitle">All 48 qualified nations</p>
+    <h2>Teams</h2>
+    <p class="subtitle">All 48 qualified nations</p>
 </div>
 
 <div *ngIf="loading" class="state-box">
-  <div class="spinner"></div>
-  <p>Loading teams…</p>
+    <div class="spinner"></div>
+    <p>Loading teams…</p>
 </div>
 
 <div *ngIf="!loading && error" class="error-box">{{ error }}</div>
 
 <ng-container *ngIf="!loading && !error">
-  <input
-          class="search-input"
-          type="text"
-          placeholder="Search team or group…"
-          [(ngModel)]="searchQuery"
-          (ngModelChange)="applyFilter()" />
+    <input
+            class="search-input"
+            type="text"
+            placeholder="Search team or group…"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="applyFilter()" />
 
-  <div class="teams-grid">
-    <div *ngFor="let t of filtered" class="team-card">
-      <img [src]="t.flag" [alt]="t.name_en" class="team-flag" />
-      <div class="team-info">
-        <div class="team-name">{{ t.name_en }}</div>
-        <div class="team-meta">Group {{ t.groups }}</div>
-      </div>
+    <div class="teams-grid">
+        <div *ngFor="let t of filtered" class="team-card">
+            <img [src]="t.flag" [alt]="t.name_en" class="team-flag" />
+            <div class="team-info">
+                <div class="team-name">{{ t.name_en }}</div>
+                <div class="team-meta">Group {{ t.groups }}</div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div *ngIf="filtered.length === 0" class="state-box">
-    <p>No teams found.</p>
-  </div>
+    <div *ngIf="filtered.length === 0" class="state-box">
+        <p>No teams found.</p>
+    </div>
 </ng-container>
