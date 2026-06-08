@@ -6,7 +6,7 @@ import { Match, Team, Group, Stadium } from '../models/worldcup.models';
 @Injectable({ providedIn: 'root' })
 export class WorldcupService {
 
-  private readonly BASE = '/api';
+  private readonly BASE = 'https://worldcup26.ir';
 
   // Paste your token here if you have one; leave empty for public-only endpoints
   private readonly TOKEN = '';
