@@ -57,23 +57,23 @@ export class FixturesComponent implements OnInit {
   away(m: Match): string { return m.away_team_name_en ?? 'TBD'; }
 
   toIST(local_date?: string): { date: string; time: string } {
-    if (!local_date) return { date: '', time: 'TBD' };
-    const [datePart, timePart] = local_date.split(' ');
-    if (!datePart || !timePart) return { date: local_date, time: '' };
-    const [month, day, year] = datePart.split('/');
-    const [hour, minute] = timePart.split(':');
-    const utc = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute)));
-    if (isNaN(utc.getTime())) return { date: local_date, time: '' };
-    const ist = new Date(utc.getTime() + 11.5 * 60 * 60 * 1000);
-    const date = ist.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
-    const time = ist.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' IST';
-    return { date, time };
-  }
+  if (!local_date) return { date: '', time: 'TBD' };
+  const [datePart, timePart] = local_date.split(' ');
+  if (!datePart || !timePart) return { date: local_date, time: '' };
+  const [month, day, year] = datePart.split('/');
+  const [hour, minute] = timePart.split(':');
+  const utc = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute)));
+  if (isNaN(utc.getTime())) return { date: local_date, time: '' };
+  const ist = new Date(utc.getTime() + 9.5 * 60 * 60 * 1000);
+  const date = ist.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const time = ist.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' IST';
+  return { date, time };
+}
 
-  setPhase(p: string): void {
-    this.activePhase = p;
-    this.applyFilters();
-  }
+setPhase(p: string): void {
+  this.activePhase = p;
+  this.applyFilters();
+}
 
   applyFilters(): void {
     let list = this.matches;
