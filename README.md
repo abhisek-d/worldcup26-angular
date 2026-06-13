@@ -9,7 +9,6 @@ Angular 22 frontend — no backend, no database. Calls worldcup26.ir APIs direct
 | `/groups` | `GET /get/groups` | ✅ Yes |
 | `/teams` | `GET /get/teams` | ✅ Yes |
 | `/teams/:name` | `GET /get/team/?name=` | ✅ Yes |
-| `/stadiums` | `GET /get/stadiums` | ✅ Yes |
 
 ## Run in IntelliJ IDEA
 
@@ -79,5 +78,4 @@ src/app/
     ├── groups/                    ← /groups
     ├── teams/                     ← /teams
     ├── team-detail/               ← /teams/:name
-    └── stadiums/                  ← /stadiums
 ```

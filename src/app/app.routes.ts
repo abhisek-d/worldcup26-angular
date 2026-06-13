@@ -18,9 +18,5 @@ export const routes: Routes = [
     path: 'teams/:name',
     loadComponent: () => import('./pages/team-detail/team-detail.component').then(m => m.TeamDetailComponent)
   },
-  {
-    path: 'stadiums',
-    loadComponent: () => import('./pages/stadiums/stadiums.component').then(m => m.StadiumsComponent)
-  },
   { path: '**', redirectTo: 'fixtures' }
 ];
