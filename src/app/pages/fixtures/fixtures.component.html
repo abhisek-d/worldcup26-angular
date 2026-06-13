@@ -14,19 +14,19 @@
   <div class="controls">
     <div class="phases">
       <button
-              *ngFor="let ph of phases"
-              class="chip"
-              [class.active]="ph === activePhase"
-              (click)="setPhase(ph)">
+        *ngFor="let ph of phases"
+        class="chip"
+        [class.active]="ph === activePhase"
+        (click)="setPhase(ph)">
         {{ ph }}
       </button>
     </div>
     <input
-            class="search-input"
-            type="text"
-            placeholder="Search team…"
-            [(ngModel)]="searchQuery"
-            (ngModelChange)="applyFilters()" />
+      class="search-input"
+      type="text"
+      placeholder="Search team…"
+      [(ngModel)]="searchQuery"
+      (ngModelChange)="applyFilters()" />
   </div>
 
   <ng-container *ngFor="let group of grouped">
@@ -34,20 +34,57 @@
       {{ group.phase }} <span class="count">({{ group.matches.length }})</span>
     </div>
 
-    <div *ngFor="let m of group.matches" class="match-card">
-      <div class="teams-col">
-        <span class="team-name home">{{ home(m) }}</span>
-        <span class="vs">vs</span>
-        <span class="team-name away">{{ away(m) }}</span>
+    <div *ngFor="let m of group.matches"
+         class="match-card"
+         [class.finished]="isFinished(m)">
+
+      <!-- Home Team -->
+      <div class="team-col home-col">
+        <div class="team-row">
+          <img *ngIf="homeFlag(m)" [src]="homeFlag(m)" [alt]="home(m)" class="flag" />
+          <span class="team-name">{{ home(m) }}</span>
+        </div>
+        <div *ngIf="isFinished(m) && parseScorers(m.home_scorers).length > 0" class="scorers-row">
+          <span *ngFor="let g of parseScorers(m.home_scorers)" class="scorer-pill" [title]="g">
+            ⚽ {{ g }}
+          </span>
+        </div>
       </div>
+
+      <!-- Score or VS -->
+      <div class="score-col">
+        <ng-container *ngIf="isFinished(m)">
+          <span class="score">{{ m.home_score }} — {{ m.away_score }}</span>
+          <span class="ft-label">Full Time</span>
+        </ng-container>
+        <span *ngIf="!isFinished(m)" class="vs">vs</span>
+      </div>
+
+      <!-- Away Team -->
+      <div class="team-col away-col">
+        <div class="team-row">
+          <img *ngIf="awayFlag(m)" [src]="awayFlag(m)" [alt]="away(m)" class="flag" />
+          <span class="team-name">{{ away(m) }}</span>
+        </div>
+        <div *ngIf="isFinished(m) && parseScorers(m.away_scorers).length > 0" class="scorers-row">
+          <span *ngFor="let g of parseScorers(m.away_scorers)" class="scorer-pill" [title]="g">
+            ⚽ {{ g }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Time -->
       <div class="time-col">
-        <div class="match-time">{{ toIST(m.local_date).time }}</div>
-        <div class="match-date">{{ toIST(m.local_date).date }}</div>
+        <div class="match-time">🕐 {{ toIST(m.local_date, m.stadium_id).time }}</div>
+        <div class="match-date">{{ toIST(m.local_date, m.stadium_id).date }}</div>
       </div>
-      <div class="group-col">
+
+      <!-- Stadium + Group -->
+      <div class="info-col">
+        <span *ngIf="stadiumName(m)" class="stadium">🏟️ {{ stadiumName(m) }}</span>
         <span *ngIf="m.group" class="group-badge">Group {{ m.group }}</span>
-        <span *ngIf="m.matchday" class="matchday">MD {{ m.matchday }}</span>
       </div>
+
     </div>
   </ng-container>
 

@@ -4,7 +4,6 @@
   .subtitle { font-size: 13px; color: #888; margin-top: 4px; }
 }
 
-/* ── Controls ── */
 .controls {
   display: flex;
   align-items: center;
@@ -36,7 +35,6 @@
   &:focus { border-color: #888; }
 }
 
-/* ── Section Label ── */
 .section-label {
   font-size: 11px;
   font-weight: 600;
@@ -47,7 +45,7 @@
   .count { font-weight: 400; }
 }
 
-/* ── Match Card ── */
+/* ── Match Card — 5 column grid ── */
 .match-card {
   background: #fff;
   border: 1px solid #eee;
@@ -55,82 +53,167 @@
   padding: 14px 18px;
   margin-bottom: 8px;
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto 1fr auto auto;
   align-items: center;
   gap: 16px;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, background 0.15s;
   &:hover { border-color: #bbb; }
+
+  &.finished {
+    background: #f7f7f7;
+    border-color: #ebebeb;
+    opacity: 0.78;
+  }
 }
 
-/* Teams column */
-.teams-col {
+/* ── Team columns ── */
+.team-col {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 6px;
   min-width: 0;
 }
+
+.team-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.flag {
+  width: 28px;
+  height: 20px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid #eee;
+  flex-shrink: 0;
+}
+
 .team-name {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.vs {
-  font-size: 12px;
-  color: #bbb;
-  font-weight: 500;
+
+/* ── Scorers — horizontal pills, title tooltip on hover ── */
+.scorers-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.scorer-pill {
+  font-size: 11px;
+  color: #555;
+  background: #f0f0f0;
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+  transition: background 0.15s, color 0.15s, max-width 0.2s;
+
+  &:hover {
+    max-width: 240px;
+    background: #e8f0fe;
+    color: #1a56db;
+  }
+}
+
+/* ── Score / VS ── */
+.score-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   flex-shrink: 0;
+  gap: 2px;
+  min-width: 80px;
 }
 
-/* Time column */
-.time-col { text-align: center; flex-shrink: 0; }
-.match-time {
-  font-size: 14px;
-  font-weight: 600;
+.score {
+  font-size: 20px;
+  font-weight: 700;
   color: #111;
+  white-space: nowrap;
 }
-.match-date { font-size: 11px; color: #aaa; margin-top: 2px; }
 
-/* Group column */
-.group-col {
+.ft-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #22c55e;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.vs {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ccc;
+}
+
+/* ── Time ── */
+.time-col {
+  flex-shrink: 0;
+  text-align: right;
+  min-width: 110px;
+}
+.match-time {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+.match-date {
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+/* ── Info (Stadium + Group) ── */
+.info-col {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  gap: 5px;
   flex-shrink: 0;
+  min-width: 130px;
+}
+.stadium {
+  font-size: 11px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
 }
 .group-badge {
   font-size: 11px;
-  padding: 3px 10px;
+  padding: 2px 8px;
   border-radius: 999px;
   background: #e8f0fe;
   color: #1a56db;
   font-weight: 600;
-}
-.matchday {
-  font-size: 11px;
-  color: #aaa;
+  white-space: nowrap;
 }
 
 /* ── States ── */
-.state-box {
-  text-align: center; padding: 3rem 1rem; color: #888; font-size: 14px;
-}
+.state-box { text-align: center; padding: 3rem 1rem; color: #888; font-size: 14px; }
 .spinner {
   width: 32px; height: 32px;
   border: 2px solid #eee; border-top-color: #888;
   border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.error-box {
-  background: #fee2e2; color: #991b1b;
-  border-radius: 12px; padding: 1rem 1.25rem; font-size: 14px;
-}
+.error-box { background: #fee2e2; color: #991b1b; border-radius: 12px; padding: 1rem 1.25rem; font-size: 14px; }
 
 /* ── Responsive ── */
-@media (max-width: 540px) {
-  .match-card { grid-template-columns: 1fr auto; gap: 10px; }
-  .group-col { display: none; } /* hide group on very small screens */
-  .search-input { width: 140px; }
+@media (max-width: 640px) {
+  .match-card { grid-template-columns: 1fr auto 1fr; }
+  .time-col, .info-col { display: none; }
+  .scorer-pill { max-width: 80px; }
 }
