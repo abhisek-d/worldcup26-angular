@@ -3,45 +3,61 @@
   <p class="subtitle">12 groups — 4 teams each</p>
 </div>
 
-@if (loading) {
-  <div class="state-box"><div class="spinner"></div><p>Loading groups…</p></div>
-} @else if (error) {
-  <div class="error-box">{{ error }}</div>
-} @else {
+<div *ngIf="loading" class="state-box">
+  <div class="spinner"></div>
+  <p>Loading groups…</p>
+</div>
+
+<div *ngIf="!loading && error" class="error-box">{{ error }}</div>
+
+<ng-container *ngIf="!loading && !error">
   <div class="groups-grid">
-    @for (g of groups; track g.id ?? $index) {
-      <div class="group-card">
-        <div class="group-title">Group {{ groupName(g) }}</div>
+    <div *ngFor="let g of groups" class="group-card">
 
-        <ul class="team-list">
-          @for (team of teamNames(g); track team) {
-            <li><a [routerLink]="['/teams', team]" class="team-link">{{ team }}</a></li>
-          }
-        </ul>
+      <div class="group-title">Group {{ g.name }}</div>
 
-        @if (g.standings && g.standings.length) {
-          <table class="standings-table">
-            <thead>
-              <tr>
-                <th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (row of g.standings; track row.team) {
-                <tr>
-                  <td>{{ row.team }}</td>
-                  <td>{{ row.played ?? '-' }}</td>
-                  <td>{{ row.won ?? '-' }}</td>
-                  <td>{{ row.drawn ?? '-' }}</td>
-                  <td>{{ row.lost ?? '-' }}</td>
-                  <td>{{ row.goal_difference ?? '-' }}</td>
-                  <td class="pts">{{ row.points ?? '-' }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        }
+      <div class="table-header">
+        <span class="col-team">Team</span>
+        <span class="col-stat">MP</span>
+        <span class="col-stat">W</span>
+        <span class="col-stat">D</span>
+        <span class="col-stat">L</span>
+        <span class="col-stat">GF</span>
+        <span class="col-stat">GA</span>
+        <span class="col-stat">GD</span>
+        <span class="col-stat pts">Pts</span>
+        <span class="col-last5">Last 5</span>
       </div>
-    }
+
+      <div *ngFor="let t of g.teams; let i = index"
+           class="team-row"
+           [class.qualified]="i < 2">
+        <div class="col-team team-info">
+          <span class="position">{{ i + 1 }}</span>
+          <img *ngIf="getFlag(t.team_id)" [src]="getFlag(t.team_id)" [alt]="getName(t.team_id)" class="flag" />
+          <span class="team-name">{{ getName(t.team_id) }}</span>
+        </div>
+        <span class="col-stat">{{ t.mp }}</span>
+        <span class="col-stat">{{ t.w }}</span>
+        <span class="col-stat">{{ t.d }}</span>
+        <span class="col-stat">{{ t.l }}</span>
+        <span class="col-stat">{{ t.gf }}</span>
+        <span class="col-stat">{{ t.ga }}</span>
+        <span class="col-stat">{{ t.gd }}</span>
+        <span class="col-stat pts">{{ t.pts }}</span>
+        <div class="col-last5 form-row">
+          <span
+            *ngFor="let r of getForm(t.team_id)"
+            class="form-dot"
+            [class.win]="r === 'W'"
+            [class.loss]="r === 'L'"
+            [class.draw]="r === 'D'"
+            [class.none]="r === 'N'"
+            [title]="r === 'W' ? 'Win' : r === 'L' ? 'Loss' : r === 'D' ? 'Draw' : 'Not played'">
+          </span>
+        </div>
+      </div>
+
+    </div>
   </div>
-}
+</ng-container>

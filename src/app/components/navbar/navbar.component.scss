@@ -13,13 +13,26 @@
   display: flex;
   align-items: center;
   gap: 2rem;
-  height: 56px;
+  height: 60px;
 }
 
 .brand {
-  font-size: 16px;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   text-decoration: none;
+  flex-shrink: 0;
+}
+
+.brand-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.brand-text {
+  font-size: 15px;
+  font-weight: 700;
   color: #111;
   white-space: nowrap;
 }
@@ -42,6 +55,6 @@
 }
 
 @media (max-width: 480px) {
-  .brand { font-size: 14px; }
+  .brand-text { display: none; }
   .nav-links a { padding: 5px 10px; font-size: 13px; }
 }
