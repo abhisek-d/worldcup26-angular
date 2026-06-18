@@ -1,0 +1,113 @@
+<div class="page-header">
+  <h2>Contest</h2>
+  <p class="subtitle">World Cup fixtures by date — tap a match for lineups</p>
+</div>
+
+<div class="date-bar">
+  <label for="dateInput">Select date:</label>
+  <input
+    id="dateInput"
+    type="date"
+    [(ngModel)]="selectedDate"
+    (ngModelChange)="onDateChange()"
+    min="2026-06-11"
+    max="2026-07-19" />
+</div>
+
+<div *ngIf="loading" class="state-box">
+  <div class="spinner"></div>
+  <p>Loading fixtures…</p>
+</div>
+
+<div *ngIf="!loading && error" class="error-box">{{ error }}</div>
+
+<ng-container *ngIf="!loading && !error">
+  <div *ngIf="fixtures.length === 0" class="state-box">
+    <p>No matches on this date.</p>
+  </div>
+
+  <div *ngFor="let f of fixtures" class="match-wrapper">
+
+    <!-- Clickable match card -->
+    <button
+      class="match-card"
+      [class.finished]="isFinished(f)"
+      [class.live]="isLive(f)"
+      [class.expanded]="expandedFixtureId === f.fixture.id"
+      (click)="toggleLineup(f.fixture.id)">
+
+      <div class="team home">
+        <img [src]="f.teams.home.logo" [alt]="f.teams.home.name" class="logo" />
+        <span class="team-name">{{ f.teams.home.name }}</span>
+      </div>
+
+      <div class="center">
+        <div *ngIf="isFinished(f) || isLive(f)" class="score">
+          {{ f.goals.home }} — {{ f.goals.away }}
+        </div>
+        <div *ngIf="isNotStarted(f)" class="vs">vs</div>
+        <div class="status"
+             [class.ft]="isFinished(f)"
+             [class.live-label]="isLive(f)">
+          <span *ngIf="isLive(f)" class="live-dot"></span>
+          {{ statusLabel(f) }}
+        </div>
+      </div>
+
+      <div class="team away">
+        <img [src]="f.teams.away.logo" [alt]="f.teams.away.name" class="logo" />
+        <span class="team-name">{{ f.teams.away.name }}</span>
+      </div>
+
+      <div class="meta">
+        <span class="round">{{ f.league.round }}</span>
+        <span *ngIf="f.fixture.venue?.name" class="venue">🏟️ {{ f.fixture.venue.name }}</span>
+        <span class="tap-hint">{{ expandedFixtureId === f.fixture.id ? '▲ Hide lineup' : '▼ View lineup' }}</span>
+      </div>
+    </button>
+
+    <!-- Lineup panel -->
+    <div *ngIf="expandedFixtureId === f.fixture.id" class="lineup-panel">
+
+      <div *ngIf="lineupLoading" class="lineup-state">
+        <div class="spinner small"></div>
+        <p>Loading lineup…</p>
+      </div>
+
+      <div *ngIf="!lineupLoading && lineupError" class="error-box">{{ lineupError }}</div>
+
+      <div *ngIf="!lineupLoading && lineupMessage" class="lineup-message">
+        ⚠️ {{ lineupMessage }}
+      </div>
+
+      <div *ngIf="!lineupLoading && lineups.length > 0" class="lineups-grid">
+        <div *ngFor="let team of lineups" class="team-lineup">
+          <div class="lineup-header">
+            <img [src]="team.team.logo" [alt]="team.team.name" class="lineup-team-logo" />
+            <div>
+              <div class="lineup-team-name">{{ team.team.name }}</div>
+              <div class="lineup-formation">Formation: {{ team.formation }}</div>
+            </div>
+          </div>
+
+          <div *ngIf="team.coach?.name" class="coach">
+            👔 Coach: {{ team.coach.name }}
+          </div>
+
+          <!-- Players by position -->
+          <ng-container *ngFor="let pos of ['G','D','M','F']">
+            <div *ngIf="playersByPos(team.startXI, pos).length > 0" class="pos-group">
+              <div class="pos-label">{{ posLabel(pos) }}</div>
+              <div class="player-row" *ngFor="let p of playersByPos(team.startXI, pos)">
+                <span class="player-num">{{ p.player.number }}</span>
+                <span class="player-name">{{ p.player.name }}</span>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</ng-container>

@@ -42,4 +42,24 @@ export class WorldcupService {
   getStadiums(): Observable<Stadium[]> {
     return this.http.get<Stadium[]>(`${this.BASE}/get/stadiums`, { headers: this.authHeaders });
   }
+
+  getContestFixtures(date: string): Observable<any> {
+  const headers = new HttpHeaders({
+    'x-apisports-key': '0da66c440ae9302c51160e64fc562209'
+  });
+  return this.http.get<any>(
+    `https://v3.football.api-sports.io/fixtures?league=1&season=2026&date=${date}`,
+    { headers }
+  );
+}
+getLineups(fixtureId: number): Observable<any> {
+  const headers = new HttpHeaders({
+    'x-apisports-key': '0da66c440ae9302c51160e64fc562209'
+  });
+  return this.http.get<any>(
+    `https://v3.football.api-sports.io/fixtures/lineups?fixture=${fixtureId}`,
+    { headers }
+  );
+}
+
 }
