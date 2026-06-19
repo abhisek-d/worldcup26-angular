@@ -1,6 +1,6 @@
 <div class="page-header">
   <h2>Contest</h2>
-  <p class="subtitle">World Cup fixtures by date — tap a match for lineups</p>
+  <p class="subtitle">World Cup fixtures by date — tap a match for full squad</p>
 </div>
 
 <div class="date-bar">
@@ -62,7 +62,7 @@
       <div class="meta">
         <span class="round">{{ f.league.round }}</span>
         <span *ngIf="f.fixture.venue?.name" class="venue">🏟️ {{ f.fixture.venue.name }}</span>
-        <span class="tap-hint">{{ expandedFixtureId === f.fixture.id ? '▲ Hide lineup' : '▼ View lineup' }}</span>
+        <span class="tap-hint">{{ expandedFixtureId === f.fixture.id ? '▲ Hide squad' : '▼ View squad' }}</span>
       </div>
     </button>
 
@@ -71,7 +71,7 @@
 
       <div *ngIf="lineupLoading" class="lineup-state">
         <div class="spinner small"></div>
-        <p>Loading lineup…</p>
+        <p>Loading squad…</p>
       </div>
 
       <div *ngIf="!lineupLoading && lineupError" class="error-box">{{ lineupError }}</div>
@@ -82,6 +82,8 @@
 
       <div *ngIf="!lineupLoading && lineups.length > 0" class="lineups-grid">
         <div *ngFor="let team of lineups" class="team-lineup">
+
+          <!-- Header -->
           <div class="lineup-header">
             <img [src]="team.team.logo" [alt]="team.team.name" class="lineup-team-logo" />
             <div>
@@ -90,20 +92,40 @@
             </div>
           </div>
 
-          <div *ngIf="team.coach?.name" class="coach">
-            👔 Coach: {{ team.coach.name }}
+          <!-- Starting XI -->
+          <div class="squad-section">
+            <div class="squad-heading">Starting XI</div>
+            <ng-container *ngFor="let pos of ['G','D','M','F']">
+              <div *ngIf="playersByPos(team.startXI, pos).length > 0" class="pos-group">
+                <div class="pos-label">{{ posLabel(pos) }}</div>
+                <div class="player-row" *ngFor="let p of playersByPos(team.startXI, pos)">
+                  <span class="player-num">{{ p.player.number }}</span>
+                  <span class="player-name">{{ p.player.name }}</span>
+                  <!---<span class="player-pos">{{ p.player.pos }}</span>--->
+                </div>
+              </div>
+            </ng-container>
           </div>
 
-          <!-- Players by position -->
-          <ng-container *ngFor="let pos of ['G','D','M','F']">
-            <div *ngIf="playersByPos(team.startXI, pos).length > 0" class="pos-group">
-              <div class="pos-label">{{ posLabel(pos) }}</div>
-              <div class="player-row" *ngFor="let p of playersByPos(team.startXI, pos)">
-                <span class="player-num">{{ p.player.number }}</span>
-                <span class="player-name">{{ p.player.name }}</span>
-              </div>
+          <!-- Substitutes -->
+          <div class="squad-section" *ngIf="team.substitutes?.length">
+            <div class="squad-heading">Substitutes</div>
+            <div class="player-row sub" *ngFor="let p of team.substitutes">
+              <span class="player-num">{{ p.player.number }}</span>
+              <span class="player-name">{{ p.player.name }}</span>
+              <span class="player-pos">{{ p.player.pos }}</span>
             </div>
-          </ng-container>
+          </div>
+
+          <!-- Coach -->
+          <div class="coach-box" *ngIf="team.coach?.name">
+            <img *ngIf="team.coach.photo" [src]="team.coach.photo" [alt]="team.coach.name" class="coach-photo" />
+            <div>
+              <div class="coach-label">Coach</div>
+              <div class="coach-name">{{ team.coach.name }}</div>
+            </div>
+          </div>
+
         </div>
       </div>
 

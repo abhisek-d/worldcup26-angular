@@ -33,6 +33,9 @@ export class ContestComponent implements OnInit {
     this.loading = true;
     this.error = '';
     this.expandedFixtureId = null;
+    this.lineups = [];
+    this.lineupMessage = '';
+
     this.wc.getContestFixtures(this.selectedDate).subscribe({
       next: (data: any) => {
         this.fixtures = data?.response ?? [];
@@ -52,7 +55,6 @@ export class ContestComponent implements OnInit {
   }
 
   toggleLineup(fixtureId: number): void {
-    // collapse if already open
     if (this.expandedFixtureId === fixtureId) {
       this.expandedFixtureId = null;
       this.lineups = [];
@@ -112,7 +114,7 @@ export class ContestComponent implements OnInit {
     return s.long ?? '';
   }
 
-  // Group startXI players by position
+  // Filter startXI players by position
   playersByPos(startXI: any[], pos: string): any[] {
     return (startXI ?? []).filter(p => p.player?.pos === pos);
   }

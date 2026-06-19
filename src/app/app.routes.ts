@@ -18,5 +18,9 @@ export const routes: Routes = [
     path: 'teams/:name',
     loadComponent: () => import('./pages/team-detail/team-detail.component').then(m => m.TeamDetailComponent)
   },
+  {
+    path: 'contest',
+    loadComponent: () => import('./pages/contest/contest.component').then(m => m.ContestComponent)
+  },
   { path: '**', redirectTo: 'fixtures' },
 ];

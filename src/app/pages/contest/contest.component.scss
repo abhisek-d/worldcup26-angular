@@ -137,7 +137,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   padding-bottom: 10px;
   border-bottom: 1px solid #f0f0f0;
 }
@@ -145,13 +145,19 @@
 .lineup-team-name { font-size: 15px; font-weight: 600; }
 .lineup-formation { font-size: 12px; color: #888; margin-top: 2px; }
 
-.coach {
+/* ── Squad sections ── */
+.squad-section {
+  margin-bottom: 14px;
+}
+.squad-heading {
   font-size: 12px;
-  color: #666;
-  margin-bottom: 10px;
-  padding: 6px 10px;
-  background: #f7f7f7;
-  border-radius: 6px;
+  font-weight: 700;
+  color: #1a56db;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #eee;
 }
 
 .pos-group { margin-bottom: 10px; }
@@ -163,11 +169,14 @@
   color: #aaa;
   margin-bottom: 4px;
 }
+
 .player-row {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 3px 0;
+
+  &.sub { opacity: 0.85; }
 }
 .player-num {
   font-size: 11px;
@@ -183,6 +192,40 @@
   flex-shrink: 0;
 }
 .player-name { font-size: 13px; color: #333; }
+.player-pos {
+  font-size: 10px;
+  color: #aaa;
+  margin-left: auto;
+  background: #f3f4f6;
+  border-radius: 3px;
+  padding: 1px 6px;
+}
+
+/* ── Coach ── */
+.coach-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f7f7f7;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-top: 4px;
+}
+.coach-photo {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.coach-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #aaa;
+  font-weight: 600;
+}
+.coach-name { font-size: 13px; font-weight: 600; color: #333; }
 
 /* ── States ── */
 .state-box { text-align: center; padding: 3rem 1rem; color: #888; font-size: 14px; }
