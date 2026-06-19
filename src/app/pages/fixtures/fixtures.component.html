@@ -1,6 +1,6 @@
 <div class="page-header">
   <h2>Fixtures</h2>
-  <p class="subtitle">All 104 matches — times shown in IST</p>
+  <p class="subtitle">All matches — times shown in IST · tap a finished match for details</p>
 </div>
 
 <div *ngIf="loading" class="state-box">
@@ -34,55 +34,95 @@
       {{ group.phase }} <span class="count">({{ group.matches.length }})</span>
     </div>
 
-    <div *ngFor="let m of group.matches"
-         class="match-card"
-         [class.finished]="isFinished(m)">
+    <div *ngFor="let m of group.matches" class="match-wrapper">
 
-      <!-- Home Team -->
-      <div class="team-col home-col">
-        <div class="team-row">
-          <img *ngIf="homeFlag(m)" [src]="homeFlag(m)" [alt]="home(m)" class="flag" />
+      <div
+        class="match-card"
+        [class.finished]="isFinished(m)"
+        [class.live]="isLive(m)"
+        [class.clickable]="isFinished(m)"
+        [class.expanded]="expandedFixtureId === m.fixture.id"
+        (click)="isFinished(m) && toggleGoals(m.fixture.id)">
+
+        <div class="team home">
+          <img *ngIf="homeLogo(m)" [src]="homeLogo(m)" [alt]="home(m)" class="logo" />
           <span class="team-name">{{ home(m) }}</span>
         </div>
-        <div *ngIf="isFinished(m) && parseScorers(m.home_scorers).length > 0" class="scorers-row">
-          <span *ngFor="let g of parseScorers(m.home_scorers)" class="scorer-pill" [title]="g">
-            ⚽ {{ g }}
-          </span>
+
+        <div class="center">
+          <div *ngIf="isFinished(m) || isLive(m)" class="score">
+            {{ homeGoals(m) }} — {{ awayGoals(m) }}
+          </div>
+          <div *ngIf="!isFinished(m) && !isLive(m)" class="vs">vs</div>
+          <div class="status" [class.ft]="isFinished(m)" [class.live-label]="isLive(m)">
+            <span *ngIf="isLive(m)" class="live-dot"></span>
+            <span *ngIf="isFinished(m)">Full Time</span>
+            <span *ngIf="isLive(m)">LIVE</span>
+          </div>
         </div>
-      </div>
 
-      <!-- Score or VS -->
-      <div class="score-col">
-        <ng-container *ngIf="isFinished(m)">
-          <span class="score">{{ m.home_score }} — {{ m.away_score }}</span>
-          <span class="ft-label">Full Time</span>
-        </ng-container>
-        <span *ngIf="!isFinished(m)" class="vs">vs</span>
-      </div>
-
-      <!-- Away Team -->
-      <div class="team-col away-col">
-        <div class="team-row">
-          <img *ngIf="awayFlag(m)" [src]="awayFlag(m)" [alt]="away(m)" class="flag" />
+        <div class="team away">
+          <img *ngIf="awayLogo(m)" [src]="awayLogo(m)" [alt]="away(m)" class="logo" />
           <span class="team-name">{{ away(m) }}</span>
         </div>
-        <div *ngIf="isFinished(m) && parseScorers(m.away_scorers).length > 0" class="scorers-row">
-          <span *ngFor="let g of parseScorers(m.away_scorers)" class="scorer-pill" [title]="g">
-            ⚽ {{ g }}
+
+        <div class="time-col">
+          <div class="match-time">🕐 {{ toIST(m.fixture.date).time }}</div>
+          <div class="match-date">{{ toIST(m.fixture.date).date }}</div>
+        </div>
+
+        <div class="info-col">
+          <span *ngIf="venue(m)" class="venue">🏟️ {{ venue(m) }}</span>
+          <span *ngIf="isFinished(m)" class="tap-hint">
+            {{ expandedFixtureId === m.fixture.id ? '▲ Hide' : '▼ Details' }}
           </span>
         </div>
+
       </div>
 
-      <!-- Time -->
-      <div class="time-col">
-        <div class="match-time">🕐 {{ toIST(m.local_date, m.stadium_id).time }}</div>
-        <div class="match-date">{{ toIST(m.local_date, m.stadium_id).date }}</div>
-      </div>
+      <!-- Event details panel -->
+      <div *ngIf="expandedFixtureId === m.fixture.id" class="goals-panel">
+        <div *ngIf="eventsLoading" class="goals-state">
+          <div class="spinner small"></div>
+          <p>Loading match details…</p>
+        </div>
 
-      <!-- Stadium + Group -->
-      <div class="info-col">
-        <span *ngIf="stadiumName(m)" class="stadium">🏟️ {{ stadiumName(m) }}</span>
-        <span *ngIf="m.group" class="group-badge">Group {{ m.group }}</span>
+        <div *ngIf="!eventsLoading && eventsError" class="error-box">{{ eventsError }}</div>
+
+        <div *ngIf="!eventsLoading && !eventsError" class="events-grid">
+
+          <!-- Home side -->
+          <div class="event-side home-side">
+            <div *ngFor="let g of goalsForTeam(m.fixture.id, homeId(m))" class="event-line">
+              <span class="ev-icon">⚽</span>
+              <span class="ev-text">{{ g.name }} {{ g.times }}<span *ngIf="g.og" class="og"> (OG)</span></span>
+            </div>
+            <div *ngFor="let c of redCardsForTeam(m.fixture.id, homeId(m))" class="event-line card">
+              <span class="ev-card"></span>
+              <span class="ev-text">{{ c.name }} {{ c.time }}</span>
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div class="event-divider"></div>
+
+          <!-- Away side -->
+          <div class="event-side away-side">
+            <div *ngFor="let g of goalsForTeam(m.fixture.id, awayId(m))" class="event-line">
+              <span class="ev-text"><span *ngIf="g.og" class="og">(OG) </span>{{ g.name }} {{ g.times }}</span>
+              <span class="ev-icon">⚽</span>
+            </div>
+            <div *ngFor="let c of redCardsForTeam(m.fixture.id, awayId(m))" class="event-line card">
+              <span class="ev-text">{{ c.name }} {{ c.time }}</span>
+              <span class="ev-card"></span>
+            </div>
+          </div>
+
+        </div>
+
+        <div *ngIf="!eventsLoading && !eventsError && !hasEvents(m.fixture.id)" class="no-goals">
+          No goals or cards in this match.
+        </div>
       </div>
 
     </div>

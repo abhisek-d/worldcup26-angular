@@ -1,7 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
 import { WorldcupService } from '../../services/worldcup.service';
 
 @Component({
@@ -20,45 +19,21 @@ export class FixturesComponent implements OnInit {
   loading = true;
   error = '';
 
-  private stadiumOffsetMap = new Map<string, number>();
-  private stadiumNameMap = new Map<string, string>();
-  private teamFlagMap = new Map<string, string>(); // team_id → flag url
+  // events state (keyed by fixture id) — stores raw events array
+  expandedFixtureId: number | null = null;
+  eventsByFixture = new Map<number, any[]>();
+  eventsLoading = false;
+  eventsError = '';
 
   constructor(private wc: WorldcupService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    forkJoin({
-      games: this.wc.getGames(),
-      stadiums: this.wc.getStadiums(),
-      teams: this.wc.getTeams()
-    }).subscribe({
-      next: (result: any) => {
-        // Build stadium maps
-        const stadiums = result.stadiums?.stadiums ?? (Array.isArray(result.stadiums) ? result.stadiums : []);
-        stadiums.forEach((s: any) => {
-          this.stadiumOffsetMap.set(String(s.id), this.regionToISTOffset(s.region, s.country_en));
-          this.stadiumNameMap.set(String(s.id), s.name_en ?? '');
-        });
-
-        // Build team flag map using team id
-        const teams = result.teams?.teams ?? (Array.isArray(result.teams) ? result.teams : []);
-        teams.forEach((t: any) => {
-          this.teamFlagMap.set(String(t.id), t.flag ?? '');
-        });
-
-        // Sort matches by local_date ascending
-        this.matches = (result.games?.games ?? (Array.isArray(result.games) ? result.games : []))
-          .sort((a: any, b: any) => {
-            const toMs = (d: string) => {
-              if (!d) return 0;
-              const [dp, tp] = d.split(' ');
-              const [mo, day, yr] = dp.split('/');
-              const [hr, mn] = (tp || '00:00').split(':');
-              return Date.UTC(+yr, +mo - 1, +day, +hr, +mn);
-            };
-            return toMs(a.local_date) - toMs(b.local_date);
-          });
-
+    this.wc.getApiFootballFixtures().subscribe({
+      next: (data: any) => {
+        const list = data?.response ?? [];
+        this.matches = list.sort((a: any, b: any) =>
+          new Date(a.fixture.date).getTime() - new Date(b.fixture.date).getTime()
+        );
         this.phases = ['All', ...new Set(this.matches.map(m => this.phase(m)))];
         this.applyFilters();
         this.loading = false;
@@ -72,61 +47,35 @@ export class FixturesComponent implements OnInit {
     });
   }
 
-  private regionToISTOffset(region: string, country: string): number {
-    if (country === 'Canada') return 9.5;
-    if (country === 'Mexico') return 10.5;
-    const map: Record<string, number> = {
-      'Eastern':  9.5,
-      'Central':  10.5,
-      'Mountain': 11.5,
-      'Western':  12.5,
-    };
-    return map[region] ?? 9.5;
+  phase(m: any): string { return m.league?.round ?? 'Fixtures'; }
+  home(m: any): string { return m.teams?.home?.name ?? 'TBD'; }
+  away(m: any): string { return m.teams?.away?.name ?? 'TBD'; }
+  homeLogo(m: any): string { return m.teams?.home?.logo ?? ''; }
+  awayLogo(m: any): string { return m.teams?.away?.logo ?? ''; }
+  homeGoals(m: any): number | null { return m.goals?.home; }
+  awayGoals(m: any): number | null { return m.goals?.away; }
+  homeId(m: any): number { return m.teams?.home?.id; }
+  awayId(m: any): number { return m.teams?.away?.id; }
+  venue(m: any): string { return m.fixture?.venue?.name ?? ''; }
+
+  isFinished(m: any): boolean { return m.fixture?.status?.long === 'Match Finished'; }
+  isLive(m: any): boolean {
+    const s = m.fixture?.status?.short;
+    return s === '1H' || s === '2H' || s === 'HT' || s === 'ET';
   }
 
-  phase(m: any): string {
-    if (!m.type) return 'Fixtures';
-    const map: Record<string, string> = {
-      group: 'Group Stage',
-      knockout: 'Knockout',
-      'round of 32': 'Round of 32',
-      'round of 16': 'Round of 16',
-      quarterfinal: 'Quarter Finals',
-      semifinal: 'Semi Finals',
-      third: 'Third Place',
-      final: 'Final',
-    };
-    return map[m.type.toLowerCase()] ?? m.type;
-  }
-
-  home(m: any): string { return m.home_team_name_en ?? 'TBD'; }
-  away(m: any): string { return m.away_team_name_en ?? 'TBD'; }
-  isFinished(m: any): boolean { return m.finished === 'TRUE'; }
-  stadiumName(m: any): string { return this.stadiumNameMap.get(String(m.stadium_id)) ?? ''; }
-  homeFlag(m: any): string { return this.teamFlagMap.get(String(m.home_team_id)) ?? ''; }
-  awayFlag(m: any): string { return this.teamFlagMap.get(String(m.away_team_id)) ?? ''; }
-
-  parseScorers(raw: string): string[] {
-    if (!raw || raw === 'null') return [];
-    return raw
-      .replace(/^\{|\}$/g, '')
-      .split(',')
-      .map(s => s.replace(/^"|"$/g, '').trim())
-      .filter(s => s.length > 0);
-  }
-
-  toIST(local_date?: string, stadium_id?: string): { date: string; time: string } {
-    if (!local_date) return { date: '', time: 'TBD' };
-    const [datePart, timePart] = local_date.split(' ');
-    if (!datePart || !timePart) return { date: local_date, time: '' };
-    const [month, day, year] = datePart.split('/');
-    const [hour, minute] = timePart.split(':');
-    const utc = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute)));
-    if (isNaN(utc.getTime())) return { date: local_date, time: '' };
-    const offsetHours = stadium_id ? (this.stadiumOffsetMap.get(String(stadium_id)) ?? 9.5) : 9.5;
-    const ist = new Date(utc.getTime() + offsetHours * 60 * 60 * 1000);
-    const date = ist.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
-    const time = ist.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' IST';
+  toIST(isoDate: string): { date: string; time: string } {
+    if (!isoDate) return { date: '', time: 'TBD' };
+    const d = new Date(isoDate);
+    if (isNaN(d.getTime())) return { date: '', time: 'TBD' };
+    const date = d.toLocaleDateString('en-GB', {
+      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
+      timeZone: 'Asia/Kolkata'
+    });
+    const time = d.toLocaleTimeString('en-GB', {
+      hour: '2-digit', minute: '2-digit',
+      timeZone: 'Asia/Kolkata'
+    }) + ' IST';
     return { date, time };
   }
 
@@ -152,5 +101,84 @@ export class FixturesComponent implements OnInit {
       map.get(p)!.push(m);
     });
     this.grouped = Array.from(map.entries()).map(([phase, matches]) => ({ phase, matches }));
+  }
+
+  // Toggle event details for a finished match
+  toggleGoals(fixtureId: number): void {
+    if (this.expandedFixtureId === fixtureId) {
+      this.expandedFixtureId = null;
+      return;
+    }
+    this.expandedFixtureId = fixtureId;
+    this.eventsError = '';
+
+    if (this.eventsByFixture.has(fixtureId)) {
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.eventsLoading = true;
+    this.cdr.detectChanges();
+
+    this.wc.getFixtureEvents(fixtureId).subscribe({
+      next: (data: any) => {
+        const events = data?.response ?? [];
+        this.eventsByFixture.set(fixtureId, events);
+        this.eventsLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.eventsError = `Failed to load events — ${err.message}`;
+        this.eventsLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private eventsFor(fixtureId: number): any[] {
+    return this.eventsByFixture.get(fixtureId) ?? [];
+  }
+
+  hasEvents(fixtureId: number): boolean {
+    return this.eventsFor(fixtureId).length > 0;
+  }
+
+  private timeStr(ev: any): string {
+    const e = ev.time?.elapsed ?? '';
+    const extra = ev.time?.extra;
+    return extra ? `${e}+${extra}'` : `${e}'`;
+  }
+
+  // Goals for a team, grouped by player → "Jonathan David 29', 45+3', 90+2'"
+  goalsForTeam(fixtureId: number, teamId: number): { name: string; times: string; og: boolean }[] {
+    const goals = this.eventsFor(fixtureId).filter(
+      e => e.type === 'Goal' && e.team?.id === teamId
+    );
+
+    // group by player name
+    const map = new Map<string, { times: string[]; og: boolean }>();
+    goals.forEach(g => {
+      const name = g.player?.name ?? 'Unknown';
+      const isOG = g.detail === 'Own Goal';
+      const isPen = g.detail === 'Penalty';
+      let t = this.timeStr(g);
+      if (isPen) t += ' (P)';
+      const key = isOG ? `${name}__OG` : name;
+      if (!map.has(key)) map.set(key, { times: [], og: isOG });
+      map.get(key)!.times.push(t);
+    });
+
+    return Array.from(map.entries()).map(([key, val]) => ({
+      name: key.replace('__OG', ''),
+      times: val.times.join(', '),
+      og: val.og
+    }));
+  }
+
+  // Red cards for a team
+  redCardsForTeam(fixtureId: number, teamId: number): { name: string; time: string }[] {
+    return this.eventsFor(fixtureId)
+      .filter(e => e.type === 'Card' && e.detail === 'Red Card' && e.team?.id === teamId)
+      .map(c => ({ name: c.player?.name ?? 'Unknown', time: this.timeStr(c) }));
   }
 }

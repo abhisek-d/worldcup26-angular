@@ -61,5 +61,22 @@ getLineups(fixtureId: number): Observable<any> {
     { headers }
   );
 }
-
+getApiFootballFixtures(): Observable<any> {
+  const headers = new HttpHeaders({
+    'x-apisports-key': '0da66c440ae9302c51160e64fc562209'
+  });
+  return this.http.get<any>(
+    `https://v3.football.api-sports.io/fixtures?league=1&season=2026&from=2026-06-01&to=2026-07-31`,
+    { headers }
+  );
+}
+getFixtureEvents(fixtureId: number): Observable<any> {
+  const headers = new HttpHeaders({
+    'x-apisports-key': '0da66c440ae9302c51160e64fc562209'
+  });
+  return this.http.get<any>(
+    `https://v3.football.api-sports.io/fixtures/events?fixture=${fixtureId}`,
+    { headers }
+  );
+}
 }
