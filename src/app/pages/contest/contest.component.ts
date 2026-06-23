@@ -14,7 +14,7 @@ export class ContestComponent implements OnInit {
   fixtures: any[] = [];
   loading = true;
   error = '';
-  selectedDate = '2026-06-18';
+  selectedDate = new Date().toISOString().split('T')[0];
 
   // lineup state
   expandedFixtureId: number | null = null;
