@@ -7,8 +7,6 @@ import { Match, Team, Group, Stadium } from '../models/worldcup.models';
 export class WorldcupService {
 
   private readonly BASE = '/api';
-
-  // Paste your token here if you have one; leave empty for public-only endpoints
   private readonly TOKEN = '';
 
   constructor(private http: HttpClient) {}
@@ -20,7 +18,6 @@ export class WorldcupService {
   }
 
   getGames(): Observable<any> {
-    // Returns { games: [...] }
     return this.http.get<any>(`${this.BASE}/get/games`);
   }
 
@@ -44,39 +41,40 @@ export class WorldcupService {
   }
 
   getContestFixtures(date: string): Observable<any> {
-  const headers = new HttpHeaders({
-    'x-apisports-key': '0da66c440ae9302c51160e64fc562209'
-  });
-  return this.http.get<any>(
-    `https://v3.football.api-sports.io/fixtures?league=1&season=2026&date=${date}`,
-    { headers }
-  );
-}
-getLineups(fixtureId: number): Observable<any> {
-  const headers = new HttpHeaders({
-    'x-apisports-key': '0da66c440ae9302c51160e64fc562209'
-  });
-  return this.http.get<any>(
-    `https://v3.football.api-sports.io/fixtures/lineups?fixture=${fixtureId}`,
-    { headers }
-  );
-}
-getApiFootballFixtures(): Observable<any> {
-  const headers = new HttpHeaders({
-    'x-apisports-key': '0da66c440ae9302c51160e64fc562209'
-  });
-  return this.http.get<any>(
-    `https://v3.football.api-sports.io/fixtures?league=1&season=2026&from=2026-06-01&to=2026-07-31`,
-    { headers }
-  );
-}
-getFixtureEvents(fixtureId: number): Observable<any> {
-  const headers = new HttpHeaders({
-    'x-apisports-key': '0da66c440ae9302c51160e64fc562209'
-  });
-  return this.http.get<any>(
-    `https://v3.football.api-sports.io/fixtures/events?fixture=${fixtureId}`,
-    { headers }
-  );
-}
+    const headers = new HttpHeaders({ 'x-apisports-key': '0da66c440ae9302c51160e64fc562209' });
+    return this.http.get<any>(
+      `https://v3.football.api-sports.io/fixtures?league=1&season=2026&date=${date}`,
+      { headers }
+    );
+  }
+
+  getLineups(fixtureId: number): Observable<any> {
+    const headers = new HttpHeaders({ 'x-apisports-key': '0da66c440ae9302c51160e64fc562209' });
+    return this.http.get<any>(
+      `https://v3.football.api-sports.io/fixtures/lineups?fixture=${fixtureId}`,
+      { headers }
+    );
+  }
+
+  getApiFootballFixtures(): Observable<any> {
+    const headers = new HttpHeaders({ 'x-apisports-key': '0da66c440ae9302c51160e64fc562209' });
+    return this.http.get<any>(
+      `https://v3.football.api-sports.io/fixtures?league=1&season=2026&from=2026-06-01&to=2026-07-31`,
+      { headers }
+    );
+  }
+
+  getFixtureEvents(fixtureId: number): Observable<any> {
+    const headers = new HttpHeaders({ 'x-apisports-key': '0da66c440ae9302c51160e64fc562209' });
+    return this.http.get<any>(
+      `https://v3.football.api-sports.io/fixtures/events?fixture=${fixtureId}`,
+      { headers }
+    );
+  }
+
+  getMatchPoints(matchId: number): Observable<any> {
+    return this.http.get<any>(
+      `https://fantasy-scoring-engine.onrender.com/match-points?matchId=${matchId}`
+    );
+  }
 }

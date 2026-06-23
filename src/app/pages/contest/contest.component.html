@@ -28,43 +28,55 @@
 
   <div *ngFor="let f of fixtures" class="match-wrapper">
 
-    <!-- Clickable match card -->
-    <button
-      class="match-card"
-      [class.finished]="isFinished(f)"
-      [class.live]="isLive(f)"
-      [class.expanded]="expandedFixtureId === f.fixture.id"
-      (click)="toggleLineup(f.fixture.id)">
+    <!-- Match card + points button side by side -->
+    <div class="match-row">
 
-      <div class="team home">
-        <img [src]="f.teams.home.logo" [alt]="f.teams.home.name" class="logo" />
-        <span class="team-name">{{ f.teams.home.name }}</span>
-      </div>
+      <!-- Clickable match card -->
+      <button
+        class="match-card"
+        [class.finished]="isFinished(f)"
+        [class.live]="isLive(f)"
+        [class.expanded]="expandedFixtureId === f.fixture.id"
+        (click)="toggleLineup(f.fixture.id)">
 
-      <div class="center">
-        <div *ngIf="isFinished(f) || isLive(f)" class="score">
-          {{ f.goals.home }} — {{ f.goals.away }}
+        <div class="team home">
+          <img [src]="f.teams.home.logo" [alt]="f.teams.home.name" class="logo" />
+          <span class="team-name">{{ f.teams.home.name }}</span>
         </div>
-        <div *ngIf="isNotStarted(f)" class="vs">vs</div>
-        <div class="status"
-             [class.ft]="isFinished(f)"
-             [class.live-label]="isLive(f)">
-          <span *ngIf="isLive(f)" class="live-dot"></span>
-          {{ statusLabel(f) }}
+
+        <div class="center">
+          <div *ngIf="isFinished(f) || isLive(f)" class="score">
+            {{ f.goals.home }} — {{ f.goals.away }}
+          </div>
+          <div *ngIf="isNotStarted(f)" class="vs">vs</div>
+          <div class="status"
+               [class.ft]="isFinished(f)"
+               [class.live-label]="isLive(f)">
+            <span *ngIf="isLive(f)" class="live-dot"></span>
+            {{ statusLabel(f) }}
+          </div>
         </div>
-      </div>
 
-      <div class="team away">
-        <img [src]="f.teams.away.logo" [alt]="f.teams.away.name" class="logo" />
-        <span class="team-name">{{ f.teams.away.name }}</span>
-      </div>
+        <div class="team away">
+          <img [src]="f.teams.away.logo" [alt]="f.teams.away.name" class="logo" />
+          <span class="team-name">{{ f.teams.away.name }}</span>
+        </div>
 
-      <div class="meta">
-        <span class="round">{{ f.league.round }}</span>
-        <span *ngIf="f.fixture.venue?.name" class="venue">🏟️ {{ f.fixture.venue.name }}</span>
-        <span class="tap-hint">{{ expandedFixtureId === f.fixture.id ? '▲ Hide squad' : '▼ View squad' }}</span>
-      </div>
-    </button>
+        <div class="meta">
+          <span class="round">{{ f.league.round }}</span>
+          <span *ngIf="f.fixture.venue?.name" class="venue">🏟️ {{ f.fixture.venue.name }}</span>
+          <span class="tap-hint">{{ expandedFixtureId === f.fixture.id ? '▲ Hide squad' : '▼ View squad' }}</span>
+        </div>
+      </button>
+
+      <!-- Points button (beside the card) -->
+      <button class="points-btn"
+              [class.active]="pointsFixtureId === f.fixture.id"
+              (click)="toggleMatchPoints(f.fixture.id, $event)">
+        🏆 {{ pointsFixtureId === f.fixture.id ? 'Hide Points' : 'Total Points Calculation' }}
+      </button>
+
+    </div>
 
     <!-- Lineup panel -->
     <div *ngIf="expandedFixtureId === f.fixture.id" class="lineup-panel">
@@ -101,7 +113,6 @@
                 <div class="player-row" *ngFor="let p of playersByPos(team.startXI, pos)">
                   <span class="player-num">{{ p.player.number }}</span>
                   <span class="player-name">{{ p.player.name }}</span>
-                  <!---<span class="player-pos">{{ p.player.pos }}</span>--->
                 </div>
               </div>
             </ng-container>
@@ -127,6 +138,51 @@
           </div>
 
         </div>
+      </div>
+
+    </div>
+
+    <!-- Match Points panel -->
+    <div *ngIf="pointsFixtureId === f.fixture.id" class="points-panel">
+
+      <div *ngIf="pointsLoading" class="lineup-state">
+        <div class="spinner small"></div>
+        <p>Calculating fantasy points…</p>
+      </div>
+
+      <div *ngIf="!pointsLoading && pointsError" class="error-box">{{ pointsError }}</div>
+
+      <div *ngIf="!pointsLoading && matchPoints?.teams?.length" class="points-grid">
+        <div *ngFor="let team of matchPoints.teams" class="team-points">
+
+          <div class="points-header">
+            <img [src]="team.teamLogo" [alt]="team.teamName" class="points-logo" />
+            <span class="points-team-name">{{ team.teamName }}</span>
+            <span class="points-total">{{ team.teamTotalPoints }} pts</span>
+          </div>
+
+          <div class="points-player" *ngFor="let p of sortedPlayers(team.players)">
+            <div class="pp-top">
+              <span class="pp-name">{{ p.playerName }}</span>
+              <span class="pp-pts" [class.zero]="p.totalPoints === 0">{{ p.totalPoints }}</span>
+            </div>
+            <div class="pp-meta">
+              <span class="pp-pos">{{ p.position || '—' }}</span>
+              <span class="pp-mins">{{ p.minutes }}'</span>
+              <span *ngIf="p.substitute" class="pp-sub">SUB</span>
+            </div>
+            <div class="pp-breakdown" *ngIf="breakdownEntries(p.breakdown).length">
+              <span class="pp-chip" *ngFor="let b of breakdownEntries(p.breakdown)">
+                {{ b.key }} {{ b.value > 0 ? '+' : '' }}{{ b.value }}
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div *ngIf="!pointsLoading && !pointsError && matchPoints && !matchPoints?.teams?.length" class="lineup-message">
+        No points yet — stats available after the match finishes.
       </div>
 
     </div>

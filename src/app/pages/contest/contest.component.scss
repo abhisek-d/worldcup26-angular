@@ -22,9 +22,17 @@
 
 .match-wrapper { margin-bottom: 10px; }
 
+/* ── Top row: match card + button side by side ── */
+.match-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
 /* ── Match card (button) ── */
 .match-card {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   background: #fff;
   border: 1px solid #eee;
   border-radius: 12px;
@@ -53,11 +61,18 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
   &.away { flex-direction: row-reverse; text-align: right; }
 }
 
 .logo { width: 36px; height: 36px; object-fit: contain; flex-shrink: 0; }
-.team-name { font-size: 15px; font-weight: 600; }
+.team-name {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .center {
   text-align: center;
@@ -65,6 +80,7 @@
   flex-direction: column;
   align-items: center;
   gap: 3px;
+  min-width: 70px;
 }
 .score { font-size: 22px; font-weight: 700; color: #111; white-space: nowrap; }
 .vs { font-size: 14px; color: #ccc; font-weight: 500; }
@@ -98,6 +114,27 @@
 .round { font-size: 12px; color: #666; }
 .venue { font-size: 12px; color: #888; }
 .tap-hint { font-size: 12px; color: #1a56db; font-weight: 500; margin-left: auto; }
+
+/* ── Match Points button (beside the card) ── */
+.points-btn {
+  flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a56db;
+  background: #eff4ff;
+  border: 1px solid #c7d7fe;
+  border-radius: 12px;
+  padding: 8px 16px;
+  max-width: 140px;
+  cursor: pointer;
+  transition: all 0.15s;
+  &:hover { background: #dbe6ff; }
+  &.active { background: #1a56db; color: #fff; border-color: #1a56db; }
+}
 
 /* ── Lineup panel ── */
 .lineup-panel {
@@ -146,9 +183,7 @@
 .lineup-formation { font-size: 12px; color: #888; margin-top: 2px; }
 
 /* ── Squad sections ── */
-.squad-section {
-  margin-bottom: 14px;
-}
+.squad-section { margin-bottom: 14px; }
 .squad-heading {
   font-size: 12px;
   font-weight: 700;
@@ -175,7 +210,6 @@
   align-items: center;
   gap: 8px;
   padding: 3px 0;
-
   &.sub { opacity: 0.85; }
 }
 .player-num {
@@ -227,6 +261,97 @@
 }
 .coach-name { font-size: 13px; font-weight: 600; color: #333; }
 
+/* ── Match Points panel ── */
+.points-panel {
+  border: 1px solid #1a56db;
+  border-radius: 12px;
+  background: #fafbff;
+  padding: 16px 18px;
+  margin-top: 8px;
+}
+.points-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.team-points {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 14px;
+}
+.points-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.points-logo { width: 28px; height: 28px; object-fit: contain; }
+.points-team-name { font-size: 15px; font-weight: 600; }
+.points-total {
+  margin-left: auto;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a56db;
+  background: #e8f0fe;
+  border-radius: 6px;
+  padding: 2px 10px;
+}
+
+.points-player {
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+  &:last-child { border-bottom: none; }
+}
+.pp-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.pp-name { font-size: 13px; font-weight: 600; color: #222; }
+.pp-pts {
+  font-size: 14px;
+  font-weight: 700;
+  color: #16a34a;
+  &.zero { color: #bbb; }
+}
+.pp-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+.pp-pos, .pp-mins {
+  font-size: 10px;
+  color: #999;
+  background: #f3f4f6;
+  border-radius: 3px;
+  padding: 1px 6px;
+}
+.pp-sub {
+  font-size: 10px;
+  color: #92742a;
+  background: #fff3d6;
+  border-radius: 3px;
+  padding: 1px 6px;
+  font-weight: 600;
+}
+.pp-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+.pp-chip {
+  font-size: 10px;
+  color: #555;
+  background: #f0f4ff;
+  border: 1px solid #e0e8ff;
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
 /* ── States ── */
 .state-box { text-align: center; padding: 3rem 1rem; color: #888; font-size: 14px; }
 .spinner {
@@ -239,8 +364,11 @@
 .error-box { background: #fee2e2; color: #991b1b; border-radius: 12px; padding: 1rem 1.25rem; font-size: 14px; }
 
 @media (max-width: 600px) {
+  .match-row { flex-direction: column; }
+  .points-btn { max-width: none; align-self: auto; justify-content: center; }
   .team-name { font-size: 13px; }
   .score { font-size: 18px; }
   .lineups-grid { grid-template-columns: 1fr; }
+  .points-grid { grid-template-columns: 1fr; }
   .tap-hint { margin-left: 0; }
 }

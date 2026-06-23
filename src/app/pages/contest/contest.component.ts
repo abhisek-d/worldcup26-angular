@@ -23,6 +23,12 @@ export class ContestComponent implements OnInit {
   lineupError = '';
   lineupMessage = '';
 
+  // match-points state
+  pointsFixtureId: number | null = null;
+  matchPoints: any = null;
+  pointsLoading = false;
+  pointsError = '';
+
   constructor(private wc: WorldcupService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
@@ -35,6 +41,8 @@ export class ContestComponent implements OnInit {
     this.expandedFixtureId = null;
     this.lineups = [];
     this.lineupMessage = '';
+    this.pointsFixtureId = null;
+    this.matchPoints = null;
 
     this.wc.getContestFixtures(this.selectedDate).subscribe({
       next: (data: any) => {
@@ -88,6 +96,45 @@ export class ContestComponent implements OnInit {
     });
   }
 
+  // ── Match Points ──
+  toggleMatchPoints(fixtureId: number, event: MouseEvent): void {
+    event.stopPropagation();
+
+    if (this.pointsFixtureId === fixtureId) {
+      this.pointsFixtureId = null;
+      this.matchPoints = null;
+      return;
+    }
+
+    this.pointsFixtureId = fixtureId;
+    this.matchPoints = null;
+    this.pointsError = '';
+    this.pointsLoading = true;
+    this.cdr.detectChanges();
+
+    this.wc.getMatchPoints(fixtureId).subscribe({
+      next: (data: any) => {
+        this.matchPoints = data;
+        this.pointsLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.pointsError = `Failed to load points — ${err.message}`;
+        this.pointsLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  sortedPlayers(players: any[]): any[] {
+    return [...(players ?? [])].sort((a, b) => b.totalPoints - a.totalPoints);
+  }
+
+  breakdownEntries(breakdown: any): { key: string; value: number }[] {
+    if (!breakdown) return [];
+    return Object.entries(breakdown).map(([key, value]) => ({ key, value: value as number }));
+  }
+
   isFinished(f: any): boolean { return f.fixture?.status?.short === 'FT'; }
   isLive(f: any): boolean {
     const s = f.fixture?.status?.short;
@@ -114,7 +161,6 @@ export class ContestComponent implements OnInit {
     return s.long ?? '';
   }
 
-  // Filter startXI players by position
   playersByPos(startXI: any[], pos: string): any[] {
     return (startXI ?? []).filter(p => p.player?.pos === pos);
   }
