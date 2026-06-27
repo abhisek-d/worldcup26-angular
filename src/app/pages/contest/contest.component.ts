@@ -39,6 +39,11 @@ export class ContestComponent implements OnInit {
   savedTeamsError = '';
   expandedSavedTeamId: string | null = null;
 
+  // ── Per-team score state (keyed by teamId) ──
+  teamScores = new Map<string, number>();
+  teamScoreLoading = new Set<string>();
+  teamScoreError = new Map<string, string>();
+
   constructor(
     private wc: WorldcupService,
     private cdr: ChangeDetectorRef,
@@ -62,6 +67,9 @@ export class ContestComponent implements OnInit {
     this.savedTeamsFixtureId = null;
     this.savedTeams = [];
     this.expandedSavedTeamId = null;
+    this.teamScores.clear();
+    this.teamScoreLoading.clear();
+    this.teamScoreError.clear();
 
     this.wc.getContestFixtures(this.selectedDate).subscribe({
       next: (data: any) => {
@@ -153,6 +161,9 @@ export class ContestComponent implements OnInit {
       this.savedTeamsFixtureId = null;
       this.savedTeams = [];
       this.expandedSavedTeamId = null;
+      this.teamScores.clear();
+      this.teamScoreLoading.clear();
+      this.teamScoreError.clear();
       return;
     }
 
@@ -161,6 +172,9 @@ export class ContestComponent implements OnInit {
     this.savedTeamsError = '';
     this.expandedSavedTeamId = null;
     this.savedTeamsLoading = true;
+    this.teamScores.clear();
+    this.teamScoreLoading.clear();
+    this.teamScoreError.clear();
     this.cdr.detectChanges();
 
     this.wc.getSavedTeams(fixtureId).subscribe({
@@ -168,6 +182,11 @@ export class ContestComponent implements OnInit {
         this.savedTeams = data ?? [];
         this.savedTeamsLoading = false;
         this.cdr.detectChanges();
+
+        // auto-fetch total points for every saved team
+        this.savedTeams.forEach((team: any) => {
+          this.fetchTeamScore(team.teamId, fixtureId);
+        });
       },
       error: (err: any) => {
         this.savedTeamsError = `Failed to load saved teams — ${err.message}`;
@@ -181,6 +200,43 @@ export class ContestComponent implements OnInit {
     this.expandedSavedTeamId = this.expandedSavedTeamId === teamId ? null : teamId;
     this.cdr.detectChanges();
   }
+
+  // ── Per-team total points ──
+  // called automatically when saved teams load, and on manual retry
+  fetchTeamScore(teamId: string, matchId: number): void {
+    if (this.teamScores.has(teamId) || this.teamScoreLoading.has(teamId)) {
+      return; // already loaded or in flight
+    }
+
+    this.teamScoreLoading.add(teamId);
+    this.teamScoreError.delete(teamId);
+    this.cdr.detectChanges();
+
+    this.wc.getTeamScore(teamId, matchId).subscribe({
+      next: (res: any) => {
+        this.teamScores.set(teamId, res?.totalPoints ?? 0);
+        this.teamScoreLoading.delete(teamId);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.teamScoreError.set(teamId, 'Error');
+        this.teamScoreLoading.delete(teamId);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // manual retry from the box (clears error first so a failed team can re-fetch)
+  loadTeamScore(teamId: string, matchId: number, event: MouseEvent): void {
+    event.stopPropagation();
+    this.teamScoreError.delete(teamId);
+    this.fetchTeamScore(teamId, matchId);
+  }
+
+  hasScore(teamId: string): boolean { return this.teamScores.has(teamId); }
+  scoreOf(teamId: string): number { return this.teamScores.get(teamId) ?? 0; }
+  isScoreLoading(teamId: string): boolean { return this.teamScoreLoading.has(teamId); }
+  scoreErrorOf(teamId: string): string { return this.teamScoreError.get(teamId) ?? ''; }
 
   captainOf(team: any): string {
     const c = (team.players ?? []).find((p: any) => p.captain);

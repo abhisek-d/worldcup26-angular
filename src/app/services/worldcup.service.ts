@@ -89,4 +89,9 @@ getSavedTeams(matchId: number): Observable<any> {
     `https://fantasy-scoring-engine.onrender.com/teams?matchId=${matchId}`
   );
 }
+getTeamScore(teamId: string, matchId: number): Observable<any> {
+  return this.http.get<any>(
+    `https://fantasy-scoring-engine.onrender.com/team-score?teamId=${encodeURIComponent(teamId)}&matchId=${matchId}`
+  );
+}
 }

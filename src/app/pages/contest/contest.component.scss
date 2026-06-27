@@ -22,7 +22,6 @@
 
 .match-wrapper { margin-bottom: 10px; }
 
-/* ── Top row: match card + action buttons ── */
 .match-row {
   display: flex;
   align-items: stretch;
@@ -36,7 +35,6 @@
   flex-shrink: 0;
 }
 
-/* ── Match card (button) ── */
 .match-card {
   flex: 1;
   min-width: 0;
@@ -122,7 +120,6 @@
 .venue { font-size: 12px; color: #888; }
 .tap-hint { font-size: 12px; color: #1a56db; font-weight: 500; margin-left: auto; }
 
-/* ── Action buttons ── */
 .points-btn, .saved-btn {
   flex-shrink: 0;
   display: flex;
@@ -154,7 +151,6 @@
   &.active { background: #0f766e; color: #fff; border-color: #0f766e; }
 }
 
-/* ── Lineup panel ── */
 .lineup-panel {
   border: 1px solid #1a56db;
   border-top: none;
@@ -200,7 +196,6 @@
 .lineup-team-name { font-size: 15px; font-weight: 600; }
 .lineup-formation { font-size: 12px; color: #888; margin-top: 2px; }
 
-/* ── Squad sections ── */
 .squad-section { margin-bottom: 14px; }
 .squad-heading {
   font-size: 12px;
@@ -253,7 +248,6 @@
   padding: 1px 6px;
 }
 
-/* ── Coach ── */
 .coach-box {
   display: flex;
   align-items: center;
@@ -279,7 +273,6 @@
 }
 .coach-name { font-size: 13px; font-weight: 600; color: #333; }
 
-/* ── Match Points panel ── */
 .points-panel {
   border: 1px solid #1a56db;
   border-radius: 12px;
@@ -397,7 +390,6 @@
   padding: 1px 6px;
 }
 
-/* ── Player pick checkbox ── */
 .pick-box {
   width: 16px;
   height: 16px;
@@ -414,7 +406,6 @@
   padding-right: 6px;
 }
 
-/* ── Selection bar + submit ── */
 .selection-bar {
   position: sticky;
   bottom: 8px;
@@ -486,8 +477,15 @@
   overflow: hidden;
 }
 
+.team-block-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  background: #fff;
+}
+
 .team-block {
-  width: 100%;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -506,6 +504,56 @@
 }
 .tb-name { font-size: 15px; font-weight: 700; color: #111; }
 .tb-arrow { font-size: 12px; color: #0f766e; }
+
+/* total points box beside each team */
+.score-box {
+  flex-shrink: 0;
+  width: 110px;
+  margin: 8px 8px 8px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #effcf9;
+  border: 1.5px solid #99e1d0;
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  transition: all 0.15s;
+
+  &:hover:not(:disabled) { background: #d6f5ee; }
+  &:disabled { cursor: wait; }
+
+  &.scored {
+    background: #0f766e;
+    border-color: #0f766e;
+    .score-num, .score-label { color: #fff; }
+  }
+}
+.score-num { font-size: 22px; font-weight: 800; color: #0f766e; line-height: 1.1; }
+.score-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #0f766e;
+}
+.score-cta {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f766e;
+  text-align: center;
+  padding: 0 6px;
+}
+.score-err { font-size: 12px; font-weight: 600; color: #991b1b; }
+.score-spin {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #cdeee5;
+  border-top-color: #0f766e;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
 
 .team-detail {
   padding: 14px 16px;
@@ -581,7 +629,6 @@
   &.vice { color: #3730a3; background: #c7d2fe; }
 }
 
-/* ── States ── */
 .state-box { text-align: center; padding: 3rem 1rem; color: #888; font-size: 14px; }
 .spinner {
   width: 32px; height: 32px;

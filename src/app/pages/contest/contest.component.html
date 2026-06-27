@@ -247,13 +247,30 @@
       <div *ngIf="!savedTeamsLoading && savedTeams.length > 0" class="saved-blocks">
         <div *ngFor="let team of savedTeams" class="saved-block-wrapper">
 
-          <!-- Clickable team name block -->
-          <button class="team-block"
-                  [class.open]="expandedSavedTeamId === team.teamId"
-                  (click)="toggleSavedTeamDetail(team.teamId)">
-            <span class="tb-name">{{ team.teamName }}</span>
-            <span class="tb-arrow">{{ expandedSavedTeamId === team.teamId ? '▲' : '▼' }}</span>
-          </button>
+          <!-- Team name block + total points box -->
+          <div class="team-block-row">
+            <button class="team-block"
+                    [class.open]="expandedSavedTeamId === team.teamId"
+                    (click)="toggleSavedTeamDetail(team.teamId)">
+              <span class="tb-name">{{ team.teamName }}</span>
+              <span class="tb-arrow">{{ expandedSavedTeamId === team.teamId ? '▲' : '▼' }}</span>
+            </button>
+
+            <button class="score-box"
+                    [class.scored]="hasScore(team.teamId)"
+                    [disabled]="isScoreLoading(team.teamId)"
+                    (click)="loadTeamScore(team.teamId, f.fixture.id, $event)">
+              <span *ngIf="isScoreLoading(team.teamId)" class="score-spin"></span>
+              <ng-container *ngIf="!isScoreLoading(team.teamId)">
+                <ng-container *ngIf="hasScore(team.teamId)">
+                  <span class="score-num">{{ scoreOf(team.teamId) }}</span>
+                  <span class="score-label">pts</span>
+                </ng-container>
+                <span *ngIf="!hasScore(team.teamId) && !scoreErrorOf(team.teamId)" class="score-cta">Total Points</span>
+                <span *ngIf="scoreErrorOf(team.teamId)" class="score-err">Retry</span>
+              </ng-container>
+            </button>
+          </div>
 
           <!-- Expanded squad for this team -->
           <div *ngIf="expandedSavedTeamId === team.teamId" class="team-detail">
