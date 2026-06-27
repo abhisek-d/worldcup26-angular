@@ -100,7 +100,7 @@ export class SubmitTeamComponent {
       response: [
         {
           team: {
-            id: null,                  // auto-generated server-side (integer)
+            id: null,
             name: this.teamName.trim(),
             email: this.email.trim()
           },

@@ -32,6 +32,13 @@ export class ContestComponent implements OnInit {
   selectedPlayers = new Map<number, any>();
   readonly MAX_PLAYERS = 11;
 
+  // ── Saved teams state ──
+  savedTeamsFixtureId: number | null = null;
+  savedTeams: any[] = [];
+  savedTeamsLoading = false;
+  savedTeamsError = '';
+  expandedSavedTeamId: string | null = null;
+
   constructor(
     private wc: WorldcupService,
     private cdr: ChangeDetectorRef,
@@ -52,6 +59,9 @@ export class ContestComponent implements OnInit {
     this.pointsFixtureId = null;
     this.matchPoints = null;
     this.selectedPlayers.clear();
+    this.savedTeamsFixtureId = null;
+    this.savedTeams = [];
+    this.expandedSavedTeamId = null;
 
     this.wc.getContestFixtures(this.selectedDate).subscribe({
       next: (data: any) => {
@@ -135,6 +145,54 @@ export class ContestComponent implements OnInit {
     });
   }
 
+  // ── Saved teams ──
+  toggleSavedTeams(fixtureId: number, event: MouseEvent): void {
+    event.stopPropagation();
+
+    if (this.savedTeamsFixtureId === fixtureId) {
+      this.savedTeamsFixtureId = null;
+      this.savedTeams = [];
+      this.expandedSavedTeamId = null;
+      return;
+    }
+
+    this.savedTeamsFixtureId = fixtureId;
+    this.savedTeams = [];
+    this.savedTeamsError = '';
+    this.expandedSavedTeamId = null;
+    this.savedTeamsLoading = true;
+    this.cdr.detectChanges();
+
+    this.wc.getSavedTeams(fixtureId).subscribe({
+      next: (data: any) => {
+        this.savedTeams = data ?? [];
+        this.savedTeamsLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.savedTeamsError = `Failed to load saved teams — ${err.message}`;
+        this.savedTeamsLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  toggleSavedTeamDetail(teamId: string): void {
+    this.expandedSavedTeamId = this.expandedSavedTeamId === teamId ? null : teamId;
+    this.cdr.detectChanges();
+  }
+
+  captainOf(team: any): string {
+    const c = (team.players ?? []).find((p: any) => p.captain);
+    return c ? c.playerName : '—';
+  }
+
+  viceCaptainOf(team: any): string {
+    const v = (team.players ?? []).find((p: any) => p.viceCaptain);
+    return v ? v.playerName : '—';
+  }
+
+  // ── Team selection ──
   togglePlayer(player: any, teamName: string, teamLogo: string): void {
     const id = player.id;
     if (this.selectedPlayers.has(id)) {

@@ -22,11 +22,18 @@
 
 .match-wrapper { margin-bottom: 10px; }
 
-/* ── Top row: match card + button side by side ── */
+/* ── Top row: match card + action buttons ── */
 .match-row {
   display: flex;
   align-items: stretch;
   gap: 10px;
+}
+
+.action-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 /* ── Match card (button) ── */
@@ -115,25 +122,36 @@
 .venue { font-size: 12px; color: #888; }
 .tap-hint { font-size: 12px; color: #1a56db; font-weight: 500; margin-left: auto; }
 
-/* ── Match Points button (beside the card) ── */
-.points-btn {
+/* ── Action buttons ── */
+.points-btn, .saved-btn {
   flex-shrink: 0;
-  align-self: stretch;
   display: flex;
   align-items: center;
+  justify-content: center;
   text-align: center;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
+  border-radius: 12px;
+  padding: 8px 14px;
+  min-width: 130px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.points-btn {
+  flex: 1;
   color: #1a56db;
   background: #eff4ff;
   border: 1px solid #c7d7fe;
-  border-radius: 12px;
-  padding: 8px 16px;
-  max-width: 140px;
-  cursor: pointer;
-  transition: all 0.15s;
   &:hover { background: #dbe6ff; }
   &.active { background: #1a56db; color: #fff; border-color: #1a56db; }
+}
+.saved-btn {
+  flex: 1;
+  color: #0f766e;
+  background: #effcf9;
+  border: 1px solid #99e1d0;
+  &:hover { background: #d6f5ee; }
+  &.active { background: #0f766e; color: #fff; border-color: #0f766e; }
 }
 
 /* ── Lineup panel ── */
@@ -312,7 +330,6 @@
   gap: 8px;
 }
 
-/* player photo + name on the left of each points row */
 .pp-name-row {
   display: flex;
   align-items: center;
@@ -450,6 +467,120 @@
   }
 }
 
+/* ── Saved Teams panel ── */
+.saved-panel {
+  border: 1px solid #0f766e;
+  border-radius: 12px;
+  background: #f7fdfb;
+  padding: 16px 18px;
+  margin-top: 8px;
+}
+.saved-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.saved-block-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.team-block {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border: none;
+  padding: 14px 16px;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: background 0.15s;
+  &:hover { background: #f7fdfb; }
+  &.open {
+    background: #0f766e;
+    .tb-name, .tb-arrow { color: #fff; }
+  }
+}
+.tb-name { font-size: 15px; font-weight: 700; color: #111; }
+.tb-arrow { font-size: 12px; color: #0f766e; }
+
+.team-detail {
+  padding: 14px 16px;
+  border-top: 1px solid #f0f0f0;
+  background: #fafffe;
+}
+.saved-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.saved-email { font-size: 12px; color: #888; }
+.saved-id {
+  font-size: 11px;
+  color: #0f766e;
+  background: #effcf9;
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.saved-cvc {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.cvc-chip {
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+.cvc-chip.cap  { color: #92400e; background: #fef3c7; }
+.cvc-chip.vice { color: #3730a3; background: #e0e7ff; }
+
+.saved-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid #f7f7f7;
+  &:last-child { border-bottom: none; }
+}
+.sp-num {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0f766e;
+  background: #effcf9;
+  border-radius: 4px;
+  width: 22px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.sp-name { font-size: 13px; color: #333; }
+.sp-pos {
+  font-size: 10px;
+  color: #aaa;
+  margin-left: auto;
+  background: #f3f4f6;
+  border-radius: 3px;
+  padding: 1px 6px;
+}
+.sp-badge {
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 3px;
+  padding: 1px 5px;
+  &.cap  { color: #92400e; background: #fde68a; }
+  &.vice { color: #3730a3; background: #c7d2fe; }
+}
+
 /* ── States ── */
 .state-box { text-align: center; padding: 3rem 1rem; color: #888; font-size: 14px; }
 .spinner {
@@ -463,7 +594,8 @@
 
 @media (max-width: 600px) {
   .match-row { flex-direction: column; }
-  .points-btn { max-width: none; align-self: auto; justify-content: center; }
+  .action-col { flex-direction: row; }
+  .points-btn, .saved-btn { min-width: 0; }
   .team-name { font-size: 13px; }
   .score { font-size: 18px; }
   .lineups-grid { grid-template-columns: 1fr; }

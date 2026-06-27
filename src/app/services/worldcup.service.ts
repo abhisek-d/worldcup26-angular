@@ -82,4 +82,11 @@ export class WorldcupService {
     `https://fantasy-scoring-engine.onrender.com/create-team?matchId=${matchId}`,
     payload
   );
-}}
+}
+
+getSavedTeams(matchId: number): Observable<any> {
+  return this.http.get<any>(
+    `https://fantasy-scoring-engine.onrender.com/teams?matchId=${matchId}`
+  );
+}
+}

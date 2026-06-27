@@ -28,7 +28,7 @@
 
   <div *ngFor="let f of fixtures" class="match-wrapper">
 
-    <!-- Match card + points button side by side -->
+    <!-- Match card + action buttons -->
     <div class="match-row">
 
       <!-- Clickable match card -->
@@ -69,12 +69,20 @@
         </div>
       </button>
 
-      <!-- Points button (beside the card) -->
-      <button class="points-btn"
-              [class.active]="pointsFixtureId === f.fixture.id"
-              (click)="toggleMatchPoints(f.fixture.id, $event)">
-        🏆 {{ pointsFixtureId === f.fixture.id ? 'Hide Points' : 'Total Points Calculation' }}
-      </button>
+      <!-- Action buttons column -->
+      <div class="action-col">
+        <button class="points-btn"
+                [class.active]="pointsFixtureId === f.fixture.id"
+                (click)="toggleMatchPoints(f.fixture.id, $event)">
+          🏆 {{ pointsFixtureId === f.fixture.id ? 'Hide Points' : 'Total Points' }}
+        </button>
+
+        <button class="saved-btn"
+                [class.active]="savedTeamsFixtureId === f.fixture.id"
+                (click)="toggleSavedTeams(f.fixture.id, $event)">
+          👥 {{ savedTeamsFixtureId === f.fixture.id ? 'Hide Teams' : 'Saved Teams' }}
+        </button>
+      </div>
 
     </div>
 
@@ -218,6 +226,57 @@
 
       <div *ngIf="!pointsLoading && !pointsError && matchPoints && !matchPoints?.teams?.length" class="lineup-message">
         No points yet — stats available after the match finishes.
+      </div>
+
+    </div>
+
+    <!-- Saved Teams panel -->
+    <div *ngIf="savedTeamsFixtureId === f.fixture.id" class="saved-panel">
+
+      <div *ngIf="savedTeamsLoading" class="lineup-state">
+        <div class="spinner small"></div>
+        <p>Loading saved teams…</p>
+      </div>
+
+      <div *ngIf="!savedTeamsLoading && savedTeamsError" class="error-box">{{ savedTeamsError }}</div>
+
+      <div *ngIf="!savedTeamsLoading && !savedTeamsError && savedTeams.length === 0" class="lineup-message">
+        No teams submitted for this match yet.
+      </div>
+
+      <div *ngIf="!savedTeamsLoading && savedTeams.length > 0" class="saved-blocks">
+        <div *ngFor="let team of savedTeams" class="saved-block-wrapper">
+
+          <!-- Clickable team name block -->
+          <button class="team-block"
+                  [class.open]="expandedSavedTeamId === team.teamId"
+                  (click)="toggleSavedTeamDetail(team.teamId)">
+            <span class="tb-name">{{ team.teamName }}</span>
+            <span class="tb-arrow">{{ expandedSavedTeamId === team.teamId ? '▲' : '▼' }}</span>
+          </button>
+
+          <!-- Expanded squad for this team -->
+          <div *ngIf="expandedSavedTeamId === team.teamId" class="team-detail">
+            <div class="saved-header">
+              <div class="saved-email">{{ team.email }}</div>
+              <span class="saved-id">{{ team.teamId }}</span>
+            </div>
+
+            <div class="saved-cvc">
+              <span class="cvc-chip cap">C: {{ captainOf(team) }}</span>
+              <span class="cvc-chip vice">VC: {{ viceCaptainOf(team) }}</span>
+            </div>
+
+            <div class="saved-player" *ngFor="let p of team.players">
+              <span class="sp-num">{{ p.number }}</span>
+              <span class="sp-name">{{ p.playerName }}</span>
+              <span class="sp-pos">{{ p.pos }}</span>
+              <span *ngIf="p.captain" class="sp-badge cap">C</span>
+              <span *ngIf="p.viceCaptain" class="sp-badge vice">VC</span>
+            </div>
+          </div>
+
+        </div>
       </div>
 
     </div>
