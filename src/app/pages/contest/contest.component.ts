@@ -148,6 +148,7 @@ export class ContestComponent implements OnInit {
         name: player.name,
         number: player.number,
         pos: player.pos,
+        grid: player.grid ?? null,
         teamName,
         teamLogo
       });

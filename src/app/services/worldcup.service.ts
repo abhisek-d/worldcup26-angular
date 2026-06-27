@@ -77,4 +77,9 @@ export class WorldcupService {
       `https://fantasy-scoring-engine.onrender.com/match-points?matchId=${matchId}`
     );
   }
-}
+  createTeam(matchId: number, payload: any): Observable<any> {
+  return this.http.post<any>(
+    `https://fantasy-scoring-engine.onrender.com/create-team?matchId=${matchId}`,
+    payload
+  );
+}}

@@ -51,8 +51,12 @@
       <div *ngIf="errorMsg" class="form-error">{{ errorMsg }}</div>
 
       <div class="actions">
-        <button class="btn-secondary" (click)="goBack()">Back</button>
-        <button class="btn-primary" [disabled]="players.length === 0" (click)="submit()">Submit Team</button>
+        <button class="btn-secondary" (click)="goBack()" [disabled]="submitting">Back</button>
+        <button class="btn-primary"
+                [disabled]="players.length === 0 || submitting"
+                (click)="submit()">
+          {{ submitting ? 'Submitting…' : 'Submit Team' }}
+        </button>
       </div>
     </ng-container>
 

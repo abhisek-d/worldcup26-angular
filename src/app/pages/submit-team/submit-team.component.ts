@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TeamSelectionService } from '../../services/team-selection.service';
+import { WorldcupService } from '../../services/worldcup.service';
 
 @Component({
   selector: 'app-submit-team',
@@ -20,18 +21,19 @@ export class SubmitTeamComponent {
   captainId: number | null = null;
   viceCaptainId: number | null = null;
 
+  submitting = false;
   submitted = false;
   errorMsg = '';
 
   constructor(
     private teamSelection: TeamSelectionService,
-    private router: Router
+    private router: Router,
+    private wc: WorldcupService
   ) {
     this.players = this.teamSelection.players;
     this.fixtureId = this.teamSelection.fixtureId;
   }
 
-  // when captain is chosen, clear vice if it was the same player
   onCaptainChange(playerId: number): void {
     this.captainId = playerId;
     if (this.viceCaptainId === playerId) {
@@ -39,7 +41,6 @@ export class SubmitTeamComponent {
     }
   }
 
-  // when vice is chosen, clear captain if it was the same player
   onViceChange(playerId: number): void {
     this.viceCaptainId = playerId;
     if (this.captainId === playerId) {
@@ -71,25 +72,54 @@ export class SubmitTeamComponent {
       this.errorMsg = 'Captain and vice-captain must be different players.';
       return;
     }
+    if (this.fixtureId === null) {
+      this.errorMsg = 'Missing match id. Please go back and pick your team again.';
+      return;
+    }
 
-    // mark each player with captain/vice flags
-    const payloadPlayers = this.players.map(p => ({
-      ...p,
-      isCaptain: p.id === this.captainId,
-      isViceCaptain: p.id === this.viceCaptainId
+    // Build startXI in the lineup shape (11 players)
+    const startXI = this.players.map(p => ({
+      player: {
+        id: p.id,
+        name: p.name,
+        number: p.number,
+        pos: p.pos,
+        grid: p.grid ?? null,
+        captain: p.id === this.captainId ? 'true' : 'false',
+        viceCaptain: p.id === this.viceCaptainId ? 'true' : 'false'
+      }
     }));
 
-    // backend not ready — log the payload for now
-    console.log('Team submitted (mock):', {
-      teamName: this.teamName.trim(),
-      email: this.email.trim(),
-      fixtureId: this.fixtureId,
-      captainId: this.captainId,
-      viceCaptainId: this.viceCaptainId,
-      players: payloadPlayers
-    });
+    const payload = {
+      get: 'custom/lineup',
+      parameters: {
+        fixture: String(this.fixtureId)
+      },
+      errors: [],
+      paging: { current: 1, total: 1 },
+      response: [
+        {
+          team: {
+            id: null,                  // auto-generated server-side (integer)
+            name: this.teamName.trim(),
+            email: this.email.trim()
+          },
+          startXI: startXI
+        }
+      ]
+    };
 
-    this.submitted = true;
+    this.submitting = true;
+    this.wc.createTeam(this.fixtureId, payload).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.submitted = true;
+      },
+      error: (err: any) => {
+        this.submitting = false;
+        this.errorMsg = `Submission failed — ${err.message}. Please try again.`;
+      }
+    });
   }
 
   goBack(): void {
