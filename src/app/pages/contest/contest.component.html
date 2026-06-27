@@ -163,7 +163,11 @@
 
           <div class="points-player" *ngFor="let p of sortedPlayers(team.players)">
             <div class="pp-top">
-              <span class="pp-name">{{ p.playerName }}</span>
+              <div class="pp-name-row">
+                <img [src]="p.photo" [alt]="p.playerName" class="pp-photo"
+                     onerror="this.style.visibility='hidden'" />
+                <span class="pp-name">{{ p.playerName }}</span>
+              </div>
               <span class="pp-pts" [class.zero]="p.totalPoints === 0">{{ p.totalPoints }}</span>
             </div>
             <div class="pp-meta">

@@ -309,18 +309,45 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
-.pp-name { font-size: 13px; font-weight: 600; color: #222; }
+
+/* player photo + name on the left of each points row */
+.pp-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.pp-photo {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f0f0f0;
+  flex-shrink: 0;
+}
+
+.pp-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .pp-pts {
   font-size: 14px;
   font-weight: 700;
   color: #16a34a;
+  flex-shrink: 0;
   &.zero { color: #bbb; }
 }
 .pp-meta {
   display: flex;
   gap: 8px;
   margin-top: 2px;
+  margin-left: 36px;
 }
 .pp-pos, .pp-mins {
   font-size: 10px;
@@ -342,6 +369,7 @@
   flex-wrap: wrap;
   gap: 4px;
   margin-top: 5px;
+  margin-left: 36px;
 }
 .pp-chip {
   font-size: 10px;
