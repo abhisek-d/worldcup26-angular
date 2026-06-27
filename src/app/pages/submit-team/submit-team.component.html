@@ -4,19 +4,36 @@
     <!-- Form view -->
     <ng-container *ngIf="!submitted">
       <h2 class="title">Submit Your Team</h2>
-      <p class="subtitle">You've selected {{ players.length }} players. Enter your details to submit.</p>
+      <p class="subtitle">
+        You've selected {{ players.length }} players. Pick a captain (×2) and vice-captain (×1.5), then enter your details.
+      </p>
 
       <div *ngIf="players.length === 0" class="empty-warn">
         No players selected. Go back and pick your team.
       </div>
 
-      <!-- Selected players preview -->
+      <!-- Selected players with C / VC radios -->
       <div *ngIf="players.length > 0" class="players-preview">
+        <div class="preview-head">
+          <span class="ph-player">Player</span>
+          <span class="ph-role">C</span>
+          <span class="ph-role">VC</span>
+        </div>
         <div class="preview-player" *ngFor="let p of players">
           <span class="pv-num">{{ p.number }}</span>
           <span class="pv-name">{{ p.name }}</span>
           <span class="pv-team">{{ p.teamName }}</span>
-          <span class="pv-pos">{{ p.pos }}</span>
+
+          <label class="role-radio">
+            <input type="radio" name="captain"
+                   [checked]="captainId === p.id"
+                   (change)="onCaptainChange(p.id)" />
+          </label>
+          <label class="role-radio">
+            <input type="radio" name="vice"
+                   [checked]="viceCaptainId === p.id"
+                   (change)="onViceChange(p.id)" />
+          </label>
         </div>
       </div>
 

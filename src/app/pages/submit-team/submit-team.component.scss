@@ -9,7 +9,7 @@
 
 .submit-card {
   width: 100%;
-  max-width: 520px;
+  max-width: 560px;
   background: #fff;
   border: 1px solid #eee;
   border-radius: 16px;
@@ -29,20 +29,45 @@
   text-align: center;
 }
 
-/* selected players preview */
+/* selected players preview with radios */
 .players-preview {
   border: 1px solid #f0f0f0;
   border-radius: 10px;
   padding: 8px;
   margin-bottom: 24px;
-  max-height: 260px;
+  max-height: 320px;
   overflow-y: auto;
 }
+
+.preview-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 8px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 4px;
+}
+.ph-player {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #999;
+}
+.ph-role {
+  width: 36px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1a56db;
+}
+
 .preview-player {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 8px;
+  padding: 7px 8px;
   border-bottom: 1px solid #f7f7f7;
   &:last-child { border-bottom: none; }
 }
@@ -61,12 +86,18 @@
 }
 .pv-name { font-size: 13px; font-weight: 600; color: #222; }
 .pv-team { font-size: 12px; color: #888; margin-left: auto; }
-.pv-pos {
-  font-size: 10px;
-  color: #aaa;
-  background: #f3f4f6;
-  border-radius: 3px;
-  padding: 1px 6px;
+
+.role-radio {
+  width: 36px;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+  input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #1a56db;
+  }
 }
 
 /* form */

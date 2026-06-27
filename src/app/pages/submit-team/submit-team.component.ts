@@ -17,6 +17,9 @@ export class SubmitTeamComponent {
 
   teamName = '';
   email = '';
+  captainId: number | null = null;
+  viceCaptainId: number | null = null;
+
   submitted = false;
   errorMsg = '';
 
@@ -26,6 +29,22 @@ export class SubmitTeamComponent {
   ) {
     this.players = this.teamSelection.players;
     this.fixtureId = this.teamSelection.fixtureId;
+  }
+
+  // when captain is chosen, clear vice if it was the same player
+  onCaptainChange(playerId: number): void {
+    this.captainId = playerId;
+    if (this.viceCaptainId === playerId) {
+      this.viceCaptainId = null;
+    }
+  }
+
+  // when vice is chosen, clear captain if it was the same player
+  onViceChange(playerId: number): void {
+    this.viceCaptainId = playerId;
+    if (this.captainId === playerId) {
+      this.captainId = null;
+    }
   }
 
   submit(): void {
@@ -40,13 +59,34 @@ export class SubmitTeamComponent {
       this.errorMsg = 'Please enter a valid email address.';
       return;
     }
+    if (this.captainId === null) {
+      this.errorMsg = 'Please select a captain.';
+      return;
+    }
+    if (this.viceCaptainId === null) {
+      this.errorMsg = 'Please select a vice-captain.';
+      return;
+    }
+    if (this.captainId === this.viceCaptainId) {
+      this.errorMsg = 'Captain and vice-captain must be different players.';
+      return;
+    }
+
+    // mark each player with captain/vice flags
+    const payloadPlayers = this.players.map(p => ({
+      ...p,
+      isCaptain: p.id === this.captainId,
+      isViceCaptain: p.id === this.viceCaptainId
+    }));
 
     // backend not ready — log the payload for now
     console.log('Team submitted (mock):', {
       teamName: this.teamName.trim(),
       email: this.email.trim(),
       fixtureId: this.fixtureId,
-      players: this.players
+      captainId: this.captainId,
+      viceCaptainId: this.viceCaptainId,
+      players: payloadPlayers
     });
 
     this.submitted = true;
