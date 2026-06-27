@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -24,11 +24,13 @@ export class SubmitTeamComponent {
   submitting = false;
   submitted = false;
   errorMsg = '';
+  savedTeamId = '';
 
   constructor(
     private teamSelection: TeamSelectionService,
     private router: Router,
-    private wc: WorldcupService
+    private wc: WorldcupService,
+    private cdr: ChangeDetectorRef
   ) {
     this.players = this.teamSelection.players;
     this.fixtureId = this.teamSelection.fixtureId;
@@ -111,13 +113,22 @@ export class SubmitTeamComponent {
 
     this.submitting = true;
     this.wc.createTeam(this.fixtureId, payload).subscribe({
-      next: () => {
+      next: (res: any) => {
+        console.log('create-team response:', res);
         this.submitting = false;
-        this.submitted = true;
+        if (res && res.status === 'success') {
+          this.savedTeamId = res.teamId ?? '';
+          this.submitted = true;
+        } else {
+          this.errorMsg = (res && res.message) ? res.message : 'Submission failed. Please try again.';
+        }
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
+        console.error('create-team error:', err);
         this.submitting = false;
         this.errorMsg = `Submission failed — ${err.message}. Please try again.`;
+        this.cdr.detectChanges();
       }
     });
   }

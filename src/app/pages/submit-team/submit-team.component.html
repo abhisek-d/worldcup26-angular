@@ -66,8 +66,14 @@
         <div class="ack-icon">✅</div>
         <h2 class="ack-title">Team Submitted!</h2>
         <p class="ack-text">
-          Your team <strong>"{{ teamName }}"</strong> has been submitted successfully.
+          Your team <strong>"{{ teamName }}"</strong> has been saved successfully.
         </p>
+        <p class="ack-id" *ngIf="savedTeamId">
+          Team ID: <strong>{{ savedTeamId }}</strong>
+        </p>
+        <div class="ack-note">
+          👉 Please go to the <strong>Saved Teams</strong> section to check your team.
+        </div>
         <button class="btn-primary" (click)="done()">Done</button>
       </div>
     </ng-container>
