@@ -380,6 +380,76 @@
   padding: 1px 6px;
 }
 
+/* ── Player pick checkbox ── */
+.pick-box {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #1a56db;
+  flex-shrink: 0;
+  &:disabled { cursor: not-allowed; opacity: 0.4; }
+}
+.player-row.picked {
+  background: #eff6ff;
+  border-radius: 6px;
+  margin: 0 -6px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+/* ── Selection bar + submit ── */
+.selection-bar {
+  position: sticky;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid #1a56db;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(26, 86, 219, 0.12);
+}
+.selection-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sel-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  &.full { color: #16a34a; }
+}
+.clear-btn {
+  font-size: 12px;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  &:hover { background: #fee2e2; }
+}
+.submit-btn {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: #1a56db;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+  &:hover:not(:disabled) { background: #1647b8; }
+  &:disabled {
+    background: #c7d2e0;
+    cursor: not-allowed;
+  }
+}
+
 /* ── States ── */
 .state-box { text-align: center; padding: 3rem 1rem; color: #888; font-size: 14px; }
 .spinner {

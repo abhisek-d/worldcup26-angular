@@ -1,0 +1,140 @@
+.submit-page {
+  min-height: 100vh;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+}
+
+.submit-card {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  padding: 32px;
+}
+
+.title { font-size: 22px; font-weight: 700; color: #111; }
+.subtitle { font-size: 14px; color: #666; margin-top: 6px; margin-bottom: 20px; }
+
+.empty-warn {
+  background: #fff8e6;
+  color: #92742a;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* selected players preview */
+.players-preview {
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 8px;
+  margin-bottom: 24px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.preview-player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #f7f7f7;
+  &:last-child { border-bottom: none; }
+}
+.pv-num {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1a56db;
+  background: #e8f0fe;
+  border-radius: 4px;
+  width: 24px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pv-name { font-size: 13px; font-weight: 600; color: #222; }
+.pv-team { font-size: 12px; color: #888; margin-left: auto; }
+.pv-pos {
+  font-size: 10px;
+  color: #aaa;
+  background: #f3f4f6;
+  border-radius: 3px;
+  padding: 1px 6px;
+}
+
+/* form */
+.form-group {
+  margin-bottom: 18px;
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 6px;
+  }
+  input {
+    width: 100%;
+    font-size: 14px;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    box-sizing: border-box;
+    &:focus { border-color: #1a56db; }
+  }
+}
+
+.form-error {
+  color: #991b1b;
+  background: #fef2f2;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+.btn-primary {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: #1a56db;
+  border: none;
+  border-radius: 8px;
+  padding: 11px;
+  cursor: pointer;
+  &:hover:not(:disabled) { background: #1647b8; }
+  &:disabled { background: #c7d2e0; cursor: not-allowed; }
+}
+.btn-secondary {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 11px 20px;
+  cursor: pointer;
+  &:hover { background: #e5e7eb; }
+}
+
+/* acknowledgement */
+.ack {
+  text-align: center;
+  padding: 20px 0;
+}
+.ack-icon { font-size: 56px; }
+.ack-title { font-size: 24px; font-weight: 700; color: #111; margin-top: 12px; }
+.ack-text { font-size: 15px; color: #555; margin-top: 8px; margin-bottom: 24px; }

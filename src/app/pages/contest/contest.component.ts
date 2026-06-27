@@ -2,6 +2,8 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WorldcupService } from '../../services/worldcup.service';
+import { Router } from '@angular/router';
+import { TeamSelectionService } from '../../services/team-selection.service';
 
 @Component({
   selector: 'app-contest',
@@ -16,20 +18,26 @@ export class ContestComponent implements OnInit {
   error = '';
   selectedDate = new Date().toISOString().split('T')[0];
 
-  // lineup state
   expandedFixtureId: number | null = null;
   lineups: any[] = [];
   lineupLoading = false;
   lineupError = '';
   lineupMessage = '';
 
-  // match-points state
   pointsFixtureId: number | null = null;
   matchPoints: any = null;
   pointsLoading = false;
   pointsError = '';
 
-  constructor(private wc: WorldcupService, private cdr: ChangeDetectorRef) {}
+  selectedPlayers = new Map<number, any>();
+  readonly MAX_PLAYERS = 11;
+
+  constructor(
+    private wc: WorldcupService,
+    private cdr: ChangeDetectorRef,
+    private router: Router,
+    private teamSelection: TeamSelectionService
+  ) {}
 
   ngOnInit(): void {
     this.loadFixtures();
@@ -43,6 +51,7 @@ export class ContestComponent implements OnInit {
     this.lineupMessage = '';
     this.pointsFixtureId = null;
     this.matchPoints = null;
+    this.selectedPlayers.clear();
 
     this.wc.getContestFixtures(this.selectedDate).subscribe({
       next: (data: any) => {
@@ -75,6 +84,7 @@ export class ContestComponent implements OnInit {
     this.lineupError = '';
     this.lineupMessage = '';
     this.lineupLoading = true;
+    this.selectedPlayers.clear();
     this.cdr.detectChanges();
 
     this.wc.getLineups(fixtureId).subscribe({
@@ -96,7 +106,6 @@ export class ContestComponent implements OnInit {
     });
   }
 
-  // ── Match Points ──
   toggleMatchPoints(fixtureId: number, event: MouseEvent): void {
     event.stopPropagation();
 
@@ -124,6 +133,56 @@ export class ContestComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  togglePlayer(player: any, teamName: string, teamLogo: string): void {
+    const id = player.id;
+    if (this.selectedPlayers.has(id)) {
+      this.selectedPlayers.delete(id);
+    } else {
+      if (this.selectedPlayers.size >= this.MAX_PLAYERS) {
+        return;
+      }
+      this.selectedPlayers.set(id, {
+        id,
+        name: player.name,
+        number: player.number,
+        pos: player.pos,
+        teamName,
+        teamLogo
+      });
+    }
+    this.cdr.detectChanges();
+  }
+
+  isSelected(playerId: number): boolean {
+    return this.selectedPlayers.has(playerId);
+  }
+
+  isSelectionFull(): boolean {
+    return this.selectedPlayers.size >= this.MAX_PLAYERS;
+  }
+
+  get selectedCount(): number {
+    return this.selectedPlayers.size;
+  }
+
+  isCheckboxDisabled(playerId: number): boolean {
+    return this.isSelectionFull() && !this.isSelected(playerId);
+  }
+
+  clearSelection(): void {
+    this.selectedPlayers.clear();
+    this.cdr.detectChanges();
+  }
+
+  submitTeam(): void {
+    if (this.selectedPlayers.size !== this.MAX_PLAYERS) {
+      alert(`Please select exactly ${this.MAX_PLAYERS} players. You have selected ${this.selectedPlayers.size}.`);
+      return;
+    }
+    this.teamSelection.set(Array.from(this.selectedPlayers.values()), this.expandedFixtureId);
+    this.router.navigate(['/submit-team']);
   }
 
   sortedPlayers(players: any[]): any[] {

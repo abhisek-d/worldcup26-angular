@@ -1,6 +1,6 @@
 <div class="page-header">
   <h2>Contest</h2>
-  <p class="subtitle">World Cup fixtures by date — tap a match for full squad</p>
+  <p class="subtitle">World Cup fixtures by date — tap a match to pick your team</p>
 </div>
 
 <div class="date-bar">
@@ -65,7 +65,7 @@
         <div class="meta">
           <span class="round">{{ f.league.round }}</span>
           <span *ngIf="f.fixture.venue?.name" class="venue">🏟️ {{ f.fixture.venue.name }}</span>
-          <span class="tap-hint">{{ expandedFixtureId === f.fixture.id ? '▲ Hide squad' : '▼ View squad' }}</span>
+          <span class="tap-hint">{{ expandedFixtureId === f.fixture.id ? '▲ Hide squad' : '▼ Pick team' }}</span>
         </div>
       </button>
 
@@ -110,7 +110,14 @@
             <ng-container *ngFor="let pos of ['G','D','M','F']">
               <div *ngIf="playersByPos(team.startXI, pos).length > 0" class="pos-group">
                 <div class="pos-label">{{ posLabel(pos) }}</div>
-                <div class="player-row" *ngFor="let p of playersByPos(team.startXI, pos)">
+                <div class="player-row"
+                     [class.picked]="isSelected(p.player.id)"
+                     *ngFor="let p of playersByPos(team.startXI, pos)">
+                  <input type="checkbox"
+                         class="pick-box"
+                         [checked]="isSelected(p.player.id)"
+                         [disabled]="isCheckboxDisabled(p.player.id)"
+                         (change)="togglePlayer(p.player, team.team.name, team.team.logo)" />
                   <span class="player-num">{{ p.player.number }}</span>
                   <span class="player-name">{{ p.player.name }}</span>
                 </div>
@@ -121,7 +128,14 @@
           <!-- Substitutes -->
           <div class="squad-section" *ngIf="team.substitutes?.length">
             <div class="squad-heading">Substitutes</div>
-            <div class="player-row sub" *ngFor="let p of team.substitutes">
+            <div class="player-row sub"
+                 [class.picked]="isSelected(p.player.id)"
+                 *ngFor="let p of team.substitutes">
+              <input type="checkbox"
+                     class="pick-box"
+                     [checked]="isSelected(p.player.id)"
+                     [disabled]="isCheckboxDisabled(p.player.id)"
+                     (change)="togglePlayer(p.player, team.team.name, team.team.logo)" />
               <span class="player-num">{{ p.player.number }}</span>
               <span class="player-name">{{ p.player.name }}</span>
               <span class="player-pos">{{ p.player.pos }}</span>
@@ -138,6 +152,23 @@
           </div>
 
         </div>
+      </div>
+
+      <!-- Selection bar + submit -->
+      <div *ngIf="!lineupLoading && lineups.length > 0" class="selection-bar">
+        <div class="selection-info">
+          <span class="sel-count" [class.full]="isSelectionFull()">
+            {{ selectedCount }} / {{ MAX_PLAYERS }} selected
+          </span>
+          <button *ngIf="selectedCount > 0" class="clear-btn" (click)="clearSelection()">
+            Clear
+          </button>
+        </div>
+        <button class="submit-btn"
+                [disabled]="selectedCount !== MAX_PLAYERS"
+                (click)="submitTeam()">
+          Submit Team
+        </button>
       </div>
 
     </div>
