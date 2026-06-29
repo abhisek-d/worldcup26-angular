@@ -31,6 +31,11 @@ export class ContestComponent implements OnInit {
 
   selectedPlayers = new Map<number, any>();
   readonly MAX_PLAYERS = 11;
+  // positional rules
+  readonly MAX_GK = 1;        // exactly 1
+  readonly MIN_DEF = 3;
+  readonly MIN_MID = 3;
+  readonly MIN_FWD = 1;
 
   // ── Saved teams state ──
   savedTeamsFixtureId: number | null = null;
@@ -325,8 +330,8 @@ export class ContestComponent implements OnInit {
     if (this.selectedPlayers.has(id)) {
       this.selectedPlayers.delete(id);
     } else {
-      if (this.selectedPlayers.size >= this.MAX_PLAYERS) {
-        return;
+      if (!this.canAddPlayer(player.pos)) {
+        return; // at total cap, or trying to add a 2nd goalkeeper
       }
       this.selectedPlayers.set(id, {
         id,
@@ -355,8 +360,9 @@ export class ContestComponent implements OnInit {
     return this.selectedPlayers.size;
   }
 
-  isCheckboxDisabled(playerId: number): boolean {
-    return this.isSelectionFull() && !this.isSelected(playerId);
+  isCheckboxDisabled(player: any): boolean {
+    if (this.isSelected(player.id)) return false; // always allow unchecking
+    return !this.canAddPlayer(player.pos);
   }
 
   clearSelection(): void {
@@ -365,8 +371,8 @@ export class ContestComponent implements OnInit {
   }
 
   submitTeam(): void {
-    if (this.selectedPlayers.size !== this.MAX_PLAYERS) {
-      alert(`Please select exactly ${this.MAX_PLAYERS} players. You have selected ${this.selectedPlayers.size}.`);
+    if (!this.isTeamValid()) {
+      alert(this.validationMessage());
       return;
     }
     this.teamSelection.set(Array.from(this.selectedPlayers.values()), this.expandedFixtureId);
@@ -462,4 +468,42 @@ export class ContestComponent implements OnInit {
       return sb - sa;
     });
   }
+
+  // count selected players by position
+  countByPos(pos: string): number {
+    let n = 0;
+    this.selectedPlayers.forEach(p => { if (p.pos === pos) n++; });
+    return n;
+  }
+
+  // whether a given player can still be added, considering position rules
+  private canAddPlayer(pos: string): boolean {
+    if (this.selectedPlayers.size >= this.MAX_PLAYERS) return false;
+    // only hard live-cap is the goalkeeper (exactly 1)
+    if (pos === 'G' && this.countByPos('G') >= this.MAX_GK) return false;
+    return true;
+  }
+
+  // is the current 11 valid for submission?
+  isTeamValid(): boolean {
+    return this.selectedPlayers.size === this.MAX_PLAYERS
+      && this.countByPos('G') === this.MAX_GK
+      && this.countByPos('D') >= this.MIN_DEF
+      && this.countByPos('M') >= this.MIN_MID
+      && this.countByPos('F') >= this.MIN_FWD;
+  }
+
+  // human-readable reason the team isn't valid yet (for the UI)
+  validationMessage(): string {
+    if (this.countByPos('G') < this.MAX_GK) return 'Select 1 goalkeeper';
+    if (this.countByPos('G') > this.MAX_GK) return 'Only 1 goalkeeper allowed';
+    if (this.countByPos('D') < this.MIN_DEF) return `Select at least ${this.MIN_DEF} defenders`;
+    if (this.countByPos('M') < this.MIN_MID) return `Select at least ${this.MIN_MID} midfielders`;
+    if (this.countByPos('F') < this.MIN_FWD) return `Select at least ${this.MIN_FWD} forward`;
+    if (this.selectedPlayers.size < this.MAX_PLAYERS) {
+      return `Select ${this.MAX_PLAYERS - this.selectedPlayers.size} more player(s)`;
+    }
+    return '';
+  }
+
 }

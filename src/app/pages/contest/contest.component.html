@@ -124,7 +124,7 @@
                   <input type="checkbox"
                          class="pick-box"
                          [checked]="isSelected(p.player.id)"
-                         [disabled]="isCheckboxDisabled(p.player.id)"
+                         [disabled]="isCheckboxDisabled(p.player)"
                          (change)="togglePlayer(p.player, team.team.name, team.team.logo)" />
                   <img *ngIf="photoOf(p.player.id)" [src]="photoOf(p.player.id)"
                        class="player-photo" [alt]="p.player.name"
@@ -146,7 +146,7 @@
               <input type="checkbox"
                      class="pick-box"
                      [checked]="isSelected(p.player.id)"
-                     [disabled]="isCheckboxDisabled(p.player.id)"
+                     [disabled]="isCheckboxDisabled(p.player)"
                      (change)="togglePlayer(p.player, team.team.name, team.team.logo)" />
               <img *ngIf="photoOf(p.player.id)" [src]="photoOf(p.player.id)"
                    class="player-photo" [alt]="p.player.name"
@@ -173,18 +173,29 @@
       <!-- Selection bar + submit -->
       <div *ngIf="!lineupLoading && lineups.length > 0" class="selection-bar">
         <div class="selection-info">
-          <span class="sel-count" [class.full]="isSelectionFull()">
+          <span class="sel-count" [class.full]="isTeamValid()">
             {{ selectedCount }} / {{ MAX_PLAYERS }} selected
           </span>
+          <div class="pos-counts">
+            <span class="pos-pill" [class.ok]="countByPos('G') === MAX_GK">GK {{ countByPos('G') }}/1</span>
+            <span class="pos-pill" [class.ok]="countByPos('D') >= MIN_DEF">DEF {{ countByPos('D') }}/3+</span>
+            <span class="pos-pill" [class.ok]="countByPos('M') >= MIN_MID">MID {{ countByPos('M') }}/3+</span>
+            <span class="pos-pill" [class.ok]="countByPos('F') >= MIN_FWD">FWD {{ countByPos('F') }}/1+</span>
+          </div>
           <button *ngIf="selectedCount > 0" class="clear-btn" (click)="clearSelection()">
             Clear
           </button>
         </div>
-        <button class="submit-btn"
-                [disabled]="selectedCount !== MAX_PLAYERS"
-                (click)="submitTeam()">
-          Submit Team
-        </button>
+        <div class="submit-area">
+          <span *ngIf="!isTeamValid() && selectedCount > 0" class="validation-hint">
+            {{ validationMessage() }}
+          </span>
+          <button class="submit-btn"
+                  [disabled]="!isTeamValid()"
+                  (click)="submitTeam()">
+            Submit Team
+          </button>
+        </div>
       </div>
 
     </div>
