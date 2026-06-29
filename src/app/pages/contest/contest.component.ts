@@ -44,6 +44,9 @@ export class ContestComponent implements OnInit {
   teamScoreLoading = new Set<string>();
   teamScoreError = new Map<string, string>();
 
+  // statuses that allow joining (match not started)
+  private readonly JOINABLE_STATUSES = ['NS', 'TBD'];
+
   constructor(
     private wc: WorldcupService,
     private cdr: ChangeDetectorRef,
@@ -105,6 +108,33 @@ export class ContestComponent implements OnInit {
     this.selectedPlayers.clear();
     this.cdr.detectChanges();
 
+    // 1) check current match status before allowing team selection
+    this.wc.getFixtureStatus(fixtureId).subscribe({
+      next: (data: any) => {
+        const fixture = data?.response?.[0];
+        const shortStatus = fixture?.fixture?.status?.short ?? '';
+
+        if (!this.JOINABLE_STATUSES.includes(shortStatus)) {
+          // match already started or finished — block selection
+          this.lineupLoading = false;
+          this.lineupMessage =
+            'This match has already started. You can no longer pick or submit a team for it.';
+          this.cdr.detectChanges();
+          return;
+        }
+
+        // 2) match not started — load the squad
+        this.fetchLineups(fixtureId);
+      },
+      error: (err: any) => {
+        this.lineupError = `Failed to check match status — ${err.message}`;
+        this.lineupLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private fetchLineups(fixtureId: number): void {
     this.wc.getLineups(fixtureId).subscribe({
       next: (data: any) => {
         const resp = data?.response ?? [];
@@ -202,10 +232,9 @@ export class ContestComponent implements OnInit {
   }
 
   // ── Per-team total points ──
-  // called automatically when saved teams load, and on manual retry
   fetchTeamScore(teamId: string, matchId: number): void {
     if (this.teamScores.has(teamId) || this.teamScoreLoading.has(teamId)) {
-      return; // already loaded or in flight
+      return;
     }
 
     this.teamScoreLoading.add(teamId);
@@ -226,7 +255,6 @@ export class ContestComponent implements OnInit {
     });
   }
 
-  // manual retry from the box (clears error first so a failed team can re-fetch)
   loadTeamScore(teamId: string, matchId: number, event: MouseEvent): void {
     event.stopPropagation();
     this.teamScoreError.delete(teamId);
