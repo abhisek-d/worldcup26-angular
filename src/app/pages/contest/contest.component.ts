@@ -376,4 +376,51 @@ export class ContestComponent implements OnInit {
     };
     return map[pos] ?? pos;
   }
+
+  // rank teams by score (1 = highest). Ties share the same rank.
+  // Returns a Map of teamId -> rank. Only teams with a loaded score are ranked.
+  private computeRanks(): Map<string, number> {
+    const ranks = new Map<string, number>();
+
+    // teams that have a score, sorted high → low
+    const scored = this.savedTeams
+      .filter((t: any) => this.teamScores.has(t.teamId))
+      .map((t: any) => ({ teamId: t.teamId, score: this.teamScores.get(t.teamId)! }))
+      .sort((a, b) => b.score - a.score);
+
+    let lastScore: number | null = null;
+    let lastRank = 0;
+    scored.forEach((item, index) => {
+      if (lastScore === null || item.score !== lastScore) {
+        lastRank = index + 1;        // standard competition ranking (1,2,2,4)
+        lastScore = item.score;
+      }
+      ranks.set(item.teamId, lastRank);
+    });
+
+    return ranks;
+  }
+
+  rankOf(teamId: string): number | null {
+    return this.computeRanks().get(teamId) ?? null;
+  }
+
+  // medal/ordinal label for a rank
+  rankLabel(rank: number | null): string {
+    if (rank === null) return '';
+    if (rank === 1) return '🥇 1st';
+    if (rank === 2) return '🥈 2nd';
+    if (rank === 3) return '🥉 3rd';
+    return `${rank}th`;
+  }
+
+  // saved teams ordered by score (highest first).
+  // Teams without a loaded score yet sink to the bottom, keeping original order.
+  sortedSavedTeams(): any[] {
+    return [...this.savedTeams].sort((a, b) => {
+      const sa = this.teamScores.has(a.teamId) ? this.teamScores.get(a.teamId)! : -Infinity;
+      const sb = this.teamScores.has(b.teamId) ? this.teamScores.get(b.teamId)! : -Infinity;
+      return sb - sa; // descending
+    });
+  }
 }

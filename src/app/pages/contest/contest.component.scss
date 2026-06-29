@@ -500,6 +500,10 @@
   &.open {
     background: #0f766e;
     .tb-name, .tb-arrow { color: #fff; }
+  }&.open {
+    background: #0f766e;
+    .tb-name, .tb-arrow { color: #fff; }
+    .tb-rank { color: #0f766e; background: #fff; }
   }
 }
 .tb-name { font-size: 15px; font-weight: 700; color: #111; }
@@ -648,4 +652,24 @@
   .lineups-grid { grid-template-columns: 1fr; }
   .points-grid { grid-template-columns: 1fr; }
   .tap-hint { margin-left: 0; }
+}
+
+.tb-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.tb-rank {
+  font-size: 12px;
+  font-weight: 700;
+  color: #555;
+  background: #f1f5f9;
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  &.gold   { color: #92400e; background: #fef3c7; }
+  &.silver { color: #475569; background: #e2e8f0; }
+  &.bronze { color: #9a3412; background: #fed7aa; }
 }

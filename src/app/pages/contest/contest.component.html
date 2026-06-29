@@ -245,14 +245,20 @@
       </div>
 
       <div *ngIf="!savedTeamsLoading && savedTeams.length > 0" class="saved-blocks">
-        <div *ngFor="let team of savedTeams" class="saved-block-wrapper">
+        <div *ngFor="let team of sortedSavedTeams()" class="saved-block-wrapper">
 
           <!-- Team name block + total points box -->
           <div class="team-block-row">
             <button class="team-block"
                     [class.open]="expandedSavedTeamId === team.teamId"
                     (click)="toggleSavedTeamDetail(team.teamId)">
-              <span class="tb-name">{{ team.teamName }}</span>
+              <span class="tb-left">
+                <span *ngIf="rankOf(team.teamId) as r" class="tb-rank"
+                      [class.gold]="r === 1" [class.silver]="r === 2" [class.bronze]="r === 3">
+                  {{ rankLabel(r) }}
+                </span>
+                <span class="tb-name">{{ team.teamName }}</span>
+              </span>
               <span class="tb-arrow">{{ expandedSavedTeamId === team.teamId ? '▲' : '▼' }}</span>
             </button>
 
