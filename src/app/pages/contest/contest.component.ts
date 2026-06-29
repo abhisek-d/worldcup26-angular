@@ -49,7 +49,7 @@ export class ContestComponent implements OnInit {
   teamScoreLoading = new Set<string>();
   teamScoreError = new Map<string, string>();
 
-  // ── Player meta (photo + rating) from /fixtures/players, display only ──
+  // ── Player meta (photo + rating) from /players season squad, display only ──
   playerMeta = new Map<number, { photo: string; rating: string | null }>();
 
   // statuses that allow joining (match not started)
@@ -152,12 +152,12 @@ export class ContestComponent implements OnInit {
           this.lineupMessage = 'Line up not announced';
         } else {
           this.lineups = resp;
-          // also fetch photo + rating for each team in the match (display only)
+          // also fetch season photo + rating for each team in the match (display only)
           this.playerMeta.clear();
           resp.forEach((teamBlock: any) => {
             const teamId = teamBlock?.team?.id;
             if (teamId != null) {
-              this.fetchPlayerMeta(fixtureId, teamId);
+              this.fetchPlayerMeta(teamId, 1);
             }
           });
         }
@@ -172,22 +172,28 @@ export class ContestComponent implements OnInit {
     });
   }
 
-  private fetchPlayerMeta(fixtureId: number, teamId: number): void {
-    this.wc.getFixturePlayers(fixtureId, teamId).subscribe({
+  // Season squad meta (photo + rating). Paginated — fetch each page until current === total.
+  private fetchPlayerMeta(teamId: number, page: number): void {
+    this.wc.getTeamSquadPlayers(teamId, page).subscribe({
       next: (data: any) => {
         const resp = data?.response ?? [];
-        resp.forEach((teamBlock: any) => {
-          (teamBlock?.players ?? []).forEach((pl: any) => {
-            const id = pl?.player?.id;
-            if (id != null) {
-              this.playerMeta.set(id, {
-                photo: pl?.player?.photo ?? '',
-                rating: pl?.statistics?.[0]?.games?.rating ?? null
-              });
-            }
-          });
+        resp.forEach((entry: any) => {
+          const id = entry?.player?.id;
+          if (id != null) {
+            this.playerMeta.set(id, {
+              photo: entry?.player?.photo ?? '',
+              rating: entry?.statistics?.[0]?.games?.rating ?? null
+            });
+          }
         });
         this.cdr.detectChanges();
+
+        // follow pagination
+        const current = data?.paging?.current ?? 1;
+        const total = data?.paging?.total ?? 1;
+        if (current < total) {
+          this.fetchPlayerMeta(teamId, current + 1);
+        }
       },
       error: () => { /* meta is optional — ignore failures */ }
     });

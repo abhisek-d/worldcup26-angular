@@ -77,34 +77,41 @@ export class WorldcupService {
       `https://fantasy-scoring-engine.onrender.com/match-points?matchId=${matchId}`
     );
   }
-  createTeam(matchId: number, payload: any): Observable<any> {
-  return this.http.post<any>(
-    `https://fantasy-scoring-engine.onrender.com/create-team?matchId=${matchId}`,
-    payload
-  );
-}
 
-getSavedTeams(matchId: number): Observable<any> {
-  return this.http.get<any>(
-    `https://fantasy-scoring-engine.onrender.com/teams?matchId=${matchId}`
-  );
-}
-getTeamScore(teamId: string, matchId: number): Observable<any> {
-  return this.http.get<any>(
-    `https://fantasy-scoring-engine.onrender.com/team-score?teamId=${encodeURIComponent(teamId)}&matchId=${matchId}`
-  );
-}
-getFixtureStatus(fixtureId: number): Observable<any> {
+  createTeam(matchId: number, payload: any): Observable<any> {
+    return this.http.post<any>(
+      `https://fantasy-scoring-engine.onrender.com/create-team?matchId=${matchId}`,
+      payload
+    );
+  }
+
+  getSavedTeams(matchId: number): Observable<any> {
+    return this.http.get<any>(
+      `https://fantasy-scoring-engine.onrender.com/teams?matchId=${matchId}`
+    );
+  }
+
+  getTeamScore(teamId: string, matchId: number): Observable<any> {
+    return this.http.get<any>(
+      `https://fantasy-scoring-engine.onrender.com/team-score?teamId=${encodeURIComponent(teamId)}&matchId=${matchId}`
+    );
+  }
+
+  getFixtureStatus(fixtureId: number): Observable<any> {
     const headers = new HttpHeaders({ 'x-apisports-key': '0da66c440ae9302c51160e64fc562209' });
     return this.http.get<any>(
       `https://v3.football.api-sports.io/fixtures?id=${fixtureId}`,
       { headers }
     );
   }
-  getFixturePlayers(fixtureId: number, teamId: number): Observable<any> {
+
+  // Season squad with photo + rating, available BEFORE kickoff (unlike /fixtures/players).
+  // season=2026 & league=1 are fixed; teamId comes from the lineups response.
+  // Paginated — caller loops pages until current === total.
+  getTeamSquadPlayers(teamId: number, page: number = 1): Observable<any> {
     const headers = new HttpHeaders({ 'x-apisports-key': '0da66c440ae9302c51160e64fc562209' });
     return this.http.get<any>(
-      `https://v3.football.api-sports.io/fixtures/players?fixture=${fixtureId}&team=${teamId}`,
+      `https://v3.football.api-sports.io/players?season=2026&team=${teamId}&league=1&page=${page}`,
       { headers }
     );
   }
