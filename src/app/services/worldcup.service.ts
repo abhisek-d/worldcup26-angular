@@ -101,4 +101,11 @@ getFixtureStatus(fixtureId: number): Observable<any> {
       { headers }
     );
   }
+  getFixturePlayers(fixtureId: number, teamId: number): Observable<any> {
+    const headers = new HttpHeaders({ 'x-apisports-key': '0da66c440ae9302c51160e64fc562209' });
+    return this.http.get<any>(
+      `https://v3.football.api-sports.io/fixtures/players?fixture=${fixtureId}&team=${teamId}`,
+      { headers }
+    );
+  }
 }

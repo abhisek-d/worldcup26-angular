@@ -673,3 +673,22 @@
   &.silver { color: #475569; background: #e2e8f0; }
   &.bronze { color: #9a3412; background: #fed7aa; }
 }
+
+.player-photo {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f0f0f0;
+  flex-shrink: 0;
+}
+.player-rating {
+  font-size: 11px;
+  font-weight: 600;
+  color: #b45309;
+  background: #fef3c7;
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-left: 8px;
+  flex-shrink: 0;
+}

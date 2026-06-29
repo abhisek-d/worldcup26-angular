@@ -126,8 +126,12 @@
                          [checked]="isSelected(p.player.id)"
                          [disabled]="isCheckboxDisabled(p.player.id)"
                          (change)="togglePlayer(p.player, team.team.name, team.team.logo)" />
+                  <img *ngIf="photoOf(p.player.id)" [src]="photoOf(p.player.id)"
+                       class="player-photo" [alt]="p.player.name"
+                       onerror="this.style.visibility='hidden'" />
                   <span class="player-num">{{ p.player.number }}</span>
                   <span class="player-name">{{ p.player.name }}</span>
+                  <span class="player-rating">⭐ {{ ratingOf(p.player.id) }}</span>
                 </div>
               </div>
             </ng-container>
@@ -144,9 +148,13 @@
                      [checked]="isSelected(p.player.id)"
                      [disabled]="isCheckboxDisabled(p.player.id)"
                      (change)="togglePlayer(p.player, team.team.name, team.team.logo)" />
+              <img *ngIf="photoOf(p.player.id)" [src]="photoOf(p.player.id)"
+                   class="player-photo" [alt]="p.player.name"
+                   onerror="this.style.visibility='hidden'" />
               <span class="player-num">{{ p.player.number }}</span>
               <span class="player-name">{{ p.player.name }}</span>
               <span class="player-pos">{{ p.player.pos }}</span>
+              <span class="player-rating">⭐ {{ ratingOf(p.player.id) }}</span>
             </div>
           </div>
 
