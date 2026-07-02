@@ -125,9 +125,12 @@ export class SubmitTeamComponent {
         this.cdr.detectChanges();
       },
       error: (err: any) => {
-        console.error('create-team error:', err);
+        // Backend sends { status: 'error', message: '...' } in the 400 body (under err.error)
+        const backendMsg = err?.error?.message;
+        this.errorMsg = backendMsg
+          ? backendMsg
+          : 'Submission failed — please try again.';
         this.submitting = false;
-        this.errorMsg = `Submission failed — ${err.message}. Please try again.`;
         this.cdr.detectChanges();
       }
     });
