@@ -1,4 +1,4 @@
-﻿<div class="page-header">
+<div class="page-header">
   <h2>Contest</h2>
   <p class="subtitle">World Cup fixtures by date — tap a match to pick your team</p>
 </div>
@@ -28,8 +28,10 @@
 
   <div *ngFor="let f of fixtures" class="match-wrapper">
 
+    <!-- Match card + action buttons -->
     <div class="match-row">
 
+      <!-- Clickable match card -->
       <button
         class="match-card"
         [class.finished]="isFinished(f)"
@@ -67,6 +69,7 @@
         </div>
       </button>
 
+      <!-- Action buttons column -->
       <div class="action-col">
         <button class="points-btn"
                 [class.active]="pointsFixtureId === f.fixture.id"
@@ -83,6 +86,7 @@
 
     </div>
 
+    <!-- Lineup panel -->
     <div *ngIf="expandedFixtureId === f.fixture.id" class="lineup-panel">
 
       <div *ngIf="lineupLoading" class="lineup-state">
@@ -99,6 +103,7 @@
       <div *ngIf="!lineupLoading && lineups.length > 0" class="lineups-grid">
         <div *ngFor="let team of lineups" class="team-lineup">
 
+          <!-- Header -->
           <div class="lineup-header">
             <img [src]="team.team.logo" [alt]="team.team.name" class="lineup-team-logo" />
             <div>
@@ -107,6 +112,7 @@
             </div>
           </div>
 
+          <!-- Starting XI -->
           <div class="squad-section">
             <div class="squad-heading">Starting XI</div>
             <ng-container *ngFor="let pos of ['G','D','M','F']">
@@ -131,6 +137,7 @@
             </ng-container>
           </div>
 
+          <!-- Substitutes -->
           <div class="squad-section" *ngIf="team.substitutes?.length">
             <div class="squad-heading">Substitutes</div>
             <div class="player-row sub"
@@ -151,6 +158,7 @@
             </div>
           </div>
 
+          <!-- Coach -->
           <div class="coach-box" *ngIf="team.coach?.name">
             <img *ngIf="team.coach.photo" [src]="team.coach.photo" [alt]="team.coach.name" class="coach-photo" />
             <div>
@@ -162,6 +170,7 @@
         </div>
       </div>
 
+      <!-- Selection bar + submit -->
       <div *ngIf="!lineupLoading && lineups.length > 0" class="selection-bar">
         <div class="selection-info">
           <span class="sel-count" [class.full]="isTeamValid()">
@@ -191,6 +200,7 @@
 
     </div>
 
+    <!-- Match Points panel -->
     <div *ngIf="pointsFixtureId === f.fixture.id" class="points-panel">
 
       <div *ngIf="pointsLoading" class="lineup-state">
@@ -239,6 +249,7 @@
 
     </div>
 
+    <!-- Saved Teams panel -->
     <div *ngIf="savedTeamsFixtureId === f.fixture.id" class="saved-panel">
 
       <div *ngIf="savedTeamsLoading" class="lineup-state">
@@ -255,6 +266,7 @@
       <div *ngIf="!savedTeamsLoading && savedTeams.length > 0" class="saved-blocks">
         <div *ngFor="let team of sortedSavedTeams()" class="saved-block-wrapper">
 
+          <!-- Team name block (rank + name + edit) + total points box -->
           <div class="team-block-row">
             <button class="team-block"
                     [class.open]="expandedSavedTeamId === team.teamId"
@@ -293,6 +305,7 @@
             </button>
           </div>
 
+          <!-- Expanded squad for this team -->
           <div *ngIf="expandedSavedTeamId === team.teamId" class="team-detail">
             <div class="saved-header">
               <div class="saved-email">{{ team.email }}</div>
@@ -320,9 +333,10 @@
 
   </div>
 
+  <!-- Edit email-verification modal -->
   <div *ngIf="editModalTeam" class="edit-modal-backdrop" (click)="closeEditModal()">
     <div class="edit-modal" (click)="$event.stopPropagation()">
-      <div class="em-title">Edit "{{ editModalTeam.teamName }}"</div>
+      <div class="em-title">Edit “{{ editModalTeam.teamName }}”</div>
       <div class="em-sub">Enter the email used to create this team to verify it's yours.</div>
 
       <div class="em-field">
