@@ -741,3 +741,18 @@
   flex-shrink: 0;
   &:hover { color: #1a56db; } /* blue on hover */
 }
+.team-detail-state {
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+  padding: 16px;
+  .spinner.small { margin: 0 auto 8px; }
+}
+.team-detail-blocked {
+  text-align: center;
+  color: #92742a;
+  background: #fff8e6;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 14px 16px;
+}

@@ -305,11 +305,21 @@
             </button>
           </div>
 
+          <!-- Checking status -->
+          <div *ngIf="isDetailLoading(team.teamId)" class="team-detail team-detail-state">
+            <div class="spinner small"></div>
+            <p>Checking match status…</p>
+          </div>
+
+          <!-- Blocked: match not started -->
+          <div *ngIf="isDetailBlocked(team.teamId)" class="team-detail team-detail-blocked">
+            🔒 This team is hidden until the match starts.
+          </div>
+
           <!-- Expanded squad for this team -->
           <div *ngIf="expandedSavedTeamId === team.teamId" class="team-detail">
             <div class="saved-header">
-              <div class="saved-email">{{ team.email }}</div>
-              <span class="saved-id">{{ team.teamId }}</span>
+              <span class="saved-id">{{ team.teamNAme }}</span>
             </div>
 
             <div class="saved-cvc">
