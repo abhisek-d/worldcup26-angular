@@ -364,4 +364,9 @@
                  (closed)="closeEditModal()">
   </app-edit-team>
 
+  <!-- Edit blocked (match already started) -->
+  <div *ngIf="editBlockedMsg" class="lineup-message edit-blocked-banner">
+    ⚠️ {{ editBlockedMsg }}
+  </div>
+
 </ng-container>
