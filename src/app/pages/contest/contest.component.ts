@@ -290,11 +290,17 @@ export class ContestComponent implements OnInit {
     });
   }
 
-  // clicking the ▼ arrow: check match status first, only reveal once the match has started
   toggleSavedTeamDetail(teamId: string): void {
-    // if already open, just close it
+    // if already open, close it
     if (this.expandedSavedTeamId === teamId) {
       this.expandedSavedTeamId = null;
+      this.detailBlockedTeamId = null;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    // if currently showing the "blocked" message for this team, close that
+    if (this.detailBlockedTeamId === teamId) {
       this.detailBlockedTeamId = null;
       this.cdr.detectChanges();
       return;
@@ -610,7 +616,7 @@ export class ContestComponent implements OnInit {
 
   // what happens after successful verification (re-pick players)
   private startEdit(team: any): void {
-    // TODO: route into edit flow — see note below
+    // TODO: route into edit flow
     alert(`Verified! Editing "${team.teamName}" (id ${team.teamId}) — edit flow goes here.`);
   }
 }
