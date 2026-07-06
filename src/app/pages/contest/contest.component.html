@@ -277,7 +277,7 @@
                   {{ rankLabel(r) }}
                 </span>
                 <span class="tb-name">{{ team.teamName }}</span>
-                <span class="edit-icon" (click)="openEditModal(team, $event)" title="Edit team" role="button">
+                <span class="edit-icon" (click)="openEditModal(team, f.fixture.id, $event)" title="Edit team" role="button">
                   <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
                        fill="none" stroke="currentColor" stroke-width="2"
                        stroke-linecap="round" stroke-linejoin="round">
@@ -319,7 +319,7 @@
           <!-- Expanded squad for this team -->
           <div *ngIf="expandedSavedTeamId === team.teamId" class="team-detail">
             <div class="saved-header">
-              <span class="saved-id">{{ team.teamNAme }}</span>
+              <span class="saved-id">{{ team.teamId }}</span>
             </div>
 
             <div class="saved-cvc">
@@ -343,28 +343,12 @@
 
   </div>
 
-  <!-- Edit email-verification modal -->
-  <div *ngIf="editModalTeam" class="edit-modal-backdrop" (click)="closeEditModal()">
-    <div class="edit-modal" (click)="$event.stopPropagation()">
-      <div class="em-title">Edit “{{ editModalTeam.teamName }}”</div>
-      <div class="em-sub">Enter the email used to create this team to verify it's yours.</div>
-
-      <div class="em-field">
-        <label for="editEmail">Email ID</label>
-        <input id="editEmail"
-               type="email"
-               [(ngModel)]="editEmailInput"
-               placeholder="you@example.com"
-               (keyup.enter)="confirmEdit()" />
-      </div>
-
-      <div *ngIf="editError" class="em-error">{{ editError }}</div>
-
-      <div class="em-actions">
-        <button class="em-cancel" (click)="closeEditModal()">Cancel</button>
-        <button class="em-confirm" (click)="confirmEdit()">Verify &amp; Edit</button>
-      </div>
-    </div>
-  </div>
+  <!-- Edit team modal (new EditTeamComponent) -->
+  <app-edit-team *ngIf="editingTeam"
+                 [teamId]="editingTeam.teamId"
+                 [teamName]="editingTeam.teamName"
+                 [matchId]="editingTeam.matchId"
+                 (closed)="closeEditModal()">
+  </app-edit-team>
 
 </ng-container>

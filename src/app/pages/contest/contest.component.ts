@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { WorldcupService } from '../../services/worldcup.service';
 import { Router } from '@angular/router';
 import { TeamSelectionService } from '../../services/team-selection.service';
+import { EditTeamComponent } from '../edit-team/edit-team.component';
 
 @Component({
   selector: 'app-contest',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EditTeamComponent],
   templateUrl: './contest.component.html',
   styleUrl: './contest.component.scss'
 })
@@ -569,54 +570,21 @@ export class ContestComponent implements OnInit {
     return '';
   }
 
-  // ── Edit team (email-verified) ──
-  editModalTeam: any = null;      // the team block being edited (null = modal closed)
-  editEmailInput = '';
-  editError = '';
+  // ── Edit team (launches EditTeamComponent modal) ──
+  editingTeam: { teamId: string; teamName: string; matchId: number } | null = null;
 
-  // open the email-verification modal for a team block
-  openEditModal(team: any, event: MouseEvent): void {
+  openEditModal(team: any, matchId: number, event: MouseEvent): void {
     event.stopPropagation();       // don't toggle the block open/closed
-    this.editModalTeam = team;
-    this.editEmailInput = '';
-    this.editError = '';
+    this.editingTeam = {
+      teamId: team.teamId,
+      teamName: team.teamName,
+      matchId
+    };
     this.cdr.detectChanges();
   }
 
   closeEditModal(): void {
-    this.editModalTeam = null;
-    this.editEmailInput = '';
-    this.editError = '';
+    this.editingTeam = null;
     this.cdr.detectChanges();
-  }
-
-  // verify typed email against the team's stored email, then proceed to edit
-  confirmEdit(): void {
-    this.editError = '';
-
-    const typed = this.editEmailInput.trim().toLowerCase();
-    if (!typed) {
-      this.editError = 'Please enter your email.';
-      this.cdr.detectChanges();
-      return;
-    }
-
-    const stored = (this.editModalTeam?.email ?? '').trim().toLowerCase();
-    if (typed !== stored) {
-      this.editError = 'You can not edit this team. Email does not match.';
-      this.cdr.detectChanges();
-      return;
-    }
-
-    // email verified — proceed to edit
-    const team = this.editModalTeam;
-    this.closeEditModal();
-    this.startEdit(team);
-  }
-
-  // what happens after successful verification (re-pick players)
-  private startEdit(team: any): void {
-    // TODO: route into edit flow
-    alert(`Verified! Editing "${team.teamName}" (id ${team.teamId}) — edit flow goes here.`);
   }
 }

@@ -1,0 +1,145 @@
+<div class="edit-modal-backdrop" (click)="stage === 'picker' ? null : cancel()">
+  <div class="edit-modal" (click)="$event.stopPropagation()">
+
+    <!-- Stage: email entry -->
+    <ng-container *ngIf="stage === 'email' || stage === 'verifying'">
+      <h3 class="em-title">Edit “{{ teamName }}”</h3>
+      <p class="em-sub">Enter the email used to create this team to verify it's yours.</p>
+
+      <div class="em-field">
+        <label for="editEmail">Email ID</label>
+        <input id="editEmail" type="email" [(ngModel)]="emailInput"
+               placeholder="you@example.com"
+               [disabled]="stage === 'verifying'"
+               (keyup.enter)="verifyEmail()" />
+      </div>
+
+      <div *ngIf="errorMsg" class="em-error">{{ errorMsg }}</div>
+
+      <div class="em-actions">
+        <button class="em-cancel" (click)="cancel()" [disabled]="stage === 'verifying'">Cancel</button>
+        <button class="em-confirm" (click)="verifyEmail()" [disabled]="stage === 'verifying'">
+          {{ stage === 'verifying' ? 'Verifying…' : 'Verify' }}
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- Stage: loading squad -->
+    <div *ngIf="stage === 'loading'" class="em-loading">
+      <div class="spinner small"></div>
+      <p>Loading your team…</p>
+    </div>
+
+    <!-- Stage: picker -->
+    <ng-container *ngIf="stage === 'picker'">
+      <h3 class="em-title">Edit Squad</h3>
+
+      <div class="em-field">
+        <label for="editTeamName">Team Name</label>
+        <input id="editTeamName" type="text" [(ngModel)]="editedTeamName" />
+      </div>
+
+      <div class="picker-scroll">
+        <div *ngFor="let team of lineups" class="team-lineup">
+          <div class="lineup-header">
+            <img [src]="team.team.logo" [alt]="team.team.name" class="lineup-team-logo" />
+            <div class="lineup-team-name">{{ team.team.name }}</div>
+          </div>
+
+          <ng-container *ngFor="let pos of ['G','D','M','F']">
+            <div *ngIf="playersByPos(team.startXI, pos).length > 0" class="pos-group">
+              <div class="pos-label">{{ posLabel(pos) }}</div>
+              <div class="player-row" [class.picked]="isSelected(p.player.id)"
+                   *ngFor="let p of playersByPos(team.startXI, pos)">
+                <input type="checkbox"
+                       class="pick-box"
+                       [checked]="isSelected(p.player.id)"
+                       [disabled]="isCheckboxDisabled(p.player)"
+                       (change)="togglePlayer(p.player)" />
+                <span class="player-num">{{ p.player.number }}</span>
+                <span class="player-name">{{ p.player.name }}</span>
+                <span class="player-pos-tag">{{ p.player.pos }}</span>
+
+                <label class="role-radio" [class.disabled]="!isSelected(p.player.id)">
+                  C
+                  <input type="radio" name="captain"
+                         [disabled]="!isSelected(p.player.id)"
+                         [checked]="captainId === p.player.id"
+                         (change)="onCaptainChange(p.player.id)" />
+                </label>
+                <label class="role-radio" [class.disabled]="!isSelected(p.player.id)">
+                  VC
+                  <input type="radio" name="vice"
+                         [disabled]="!isSelected(p.player.id)"
+                         [checked]="viceCaptainId === p.player.id"
+                         (change)="onViceChange(p.player.id)" />
+                </label>
+              </div>
+            </div>
+          </ng-container>
+
+          <div class="squad-section" *ngIf="team.substitutes?.length">
+            <div class="squad-heading">Substitutes</div>
+            <div class="player-row sub" [class.picked]="isSelected(p.player.id)"
+                 *ngFor="let p of team.substitutes">
+              <input type="checkbox"
+                     class="pick-box"
+                     [checked]="isSelected(p.player.id)"
+                     [disabled]="isCheckboxDisabled(p.player)"
+                     (change)="togglePlayer(p.player)" />
+              <span class="player-num">{{ p.player.number }}</span>
+              <span class="player-name">{{ p.player.name }}</span>
+              <span class="player-pos-tag">{{ p.player.pos }}</span>
+
+              <label class="role-radio" [class.disabled]="!isSelected(p.player.id)">
+                C
+                <input type="radio" name="captain"
+                       [disabled]="!isSelected(p.player.id)"
+                       [checked]="captainId === p.player.id"
+                       (change)="onCaptainChange(p.player.id)" />
+              </label>
+              <label class="role-radio" [class.disabled]="!isSelected(p.player.id)">
+                VC
+                <input type="radio" name="vice"
+                       [disabled]="!isSelected(p.player.id)"
+                       [checked]="viceCaptainId === p.player.id"
+                       (change)="onViceChange(p.player.id)" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="picker-footer">
+        <div class="pos-counts">
+          <span class="pos-pill" [class.ok]="countByPos('G') === MAX_GK">GK {{ countByPos('G') }}/1</span>
+          <span class="pos-pill" [class.ok]="countByPos('D') >= MIN_DEF">DEF {{ countByPos('D') }}/3+</span>
+          <span class="pos-pill" [class.ok]="countByPos('M') >= MIN_MID">MID {{ countByPos('M') }}/3+</span>
+          <span class="pos-pill" [class.ok]="countByPos('F') >= MIN_FWD">FWD {{ countByPos('F') }}/1+</span>
+          <span class="sel-count" [class.full]="selectedCount === MAX_PLAYERS">{{ selectedCount }}/{{ MAX_PLAYERS }}</span>
+        </div>
+
+        <div *ngIf="errorMsg" class="em-error">{{ errorMsg }}</div>
+        <div *ngIf="!isTeamValid() && selectedCount > 0 && !errorMsg" class="validation-hint">
+          {{ validationMessage() }}
+        </div>
+
+        <div class="em-actions">
+          <button class="em-cancel" (click)="cancel()" [disabled]="updating">Cancel</button>
+          <button class="em-confirm" [disabled]="!isTeamValid() || updating" (click)="updateTeam()">
+            {{ updating ? 'Updating…' : 'Update Team' }}
+          </button>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Stage: success -->
+    <div *ngIf="stage === 'success'" class="em-success">
+      <div class="ack-icon">✅</div>
+      <h3>Team Updated!</h3>
+      <p>Your changes to <strong>{{ editedTeamName }}</strong> have been saved.</p>
+      <button class="em-confirm" (click)="done()">Done</button>
+    </div>
+
+  </div>
+</div>

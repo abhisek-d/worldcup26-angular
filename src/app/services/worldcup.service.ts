@@ -115,4 +115,22 @@ export class WorldcupService {
       { headers }
     );
   }
+  verifyTeam(matchId: number, teamId: string, email: string): Observable<any> {
+    return this.http.get<any>(
+      `https://fantasy-scoring-engine.onrender.com/verify-team?matchId=${matchId}&teamId=${encodeURIComponent(teamId)}&email=${encodeURIComponent(email)}`
+    );
+  }
+
+  getTeamByEmail(matchId: number, email: string): Observable<any> {
+    return this.http.get<any>(
+      `https://fantasy-scoring-engine.onrender.com/team-by-email?matchId=${matchId}&email=${encodeURIComponent(email)}`
+    );
+  }
+
+  updateTeam(matchId: number, payload: any): Observable<any> {
+    return this.http.put<any>(
+      `https://fantasy-scoring-engine.onrender.com/update-team?matchId=${matchId}`,
+      payload
+    );
+  }
 }
