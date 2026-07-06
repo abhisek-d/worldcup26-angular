@@ -57,6 +57,10 @@ export class ContestComponent implements OnInit {
   // ── Player meta (photo + rating) from /players season squad, display only ──
   playerMeta = new Map<number, { photo: string; rating: string | null }>();
 
+  // enriched team detail (with per-player totalPoints) from /team-by-email
+  teamDetailData = new Map<string, any>();
+  teamDetailLoading = new Set<string>();
+
   // statuses that allow joining (match not started)
   private readonly JOINABLE_STATUSES = ['NS', 'TBD'];
 
@@ -323,22 +327,55 @@ export class ContestComponent implements OnInit {
         const shortStatus = data?.response?.[0]?.fixture?.status?.short ?? '';
         this.detailStatusLoading = null;
 
-        // NOT started → hide the team; only reveal once the match has begun/finished
         if (this.JOINABLE_STATUSES.includes(shortStatus)) {
           this.detailBlockedTeamId = teamId;
-        } else {
-          this.expandedSavedTeamId = teamId;
+          this.cdr.detectChanges();
+          return;
         }
+
+        // match started/finished — reveal, then fetch enriched player data
+        this.expandedSavedTeamId = teamId;
         this.cdr.detectChanges();
+        this.fetchTeamDetailByEmail(teamId, fixtureId);
       },
       error: () => {
-        // on error, fail safe: keep it hidden and mark blocked
         this.detailStatusLoading = null;
         this.detailBlockedTeamId = teamId;
         this.cdr.detectChanges();
       }
     });
   }
+
+  // fetch enriched per-player points via /team-by-email, using the team's stored email
+  private fetchTeamDetailByEmail(teamId: string, matchId: number): void {
+    if (this.teamDetailData.has(teamId) || this.teamDetailLoading.has(teamId)) {
+      return; // already loaded or in flight
+    }
+
+    const team = this.savedTeams.find(t => t.teamId === teamId);
+    const email = team?.email;
+    if (!email) {
+      return;
+    }
+
+    this.teamDetailLoading.add(teamId);
+    this.cdr.detectChanges();
+
+    this.wc.getTeamByEmail(matchId, email).subscribe({
+      next: (res: any) => {
+        this.teamDetailData.set(teamId, res);
+        this.teamDetailLoading.delete(teamId);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.teamDetailLoading.delete(teamId);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  isTeamDetailLoading(teamId: string): boolean { return this.teamDetailLoading.has(teamId); }
+  teamDetailFor(teamId: string): any { return this.teamDetailData.get(teamId) ?? null; }
 
   isDetailLoading(teamId: string): boolean { return this.detailStatusLoading === teamId; }
   isDetailBlocked(teamId: string): boolean { return this.detailBlockedTeamId === teamId; }

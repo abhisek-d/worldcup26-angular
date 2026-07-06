@@ -318,21 +318,34 @@
 
           <!-- Expanded squad for this team -->
           <div *ngIf="expandedSavedTeamId === team.teamId" class="team-detail">
-            <div class="saved-header">
-              <span class="saved-id">{{ team.teamId }}</span>
+
+            <div *ngIf="isTeamDetailLoading(team.teamId)" class="team-detail-state">
+              <div class="spinner small"></div>
+              <p>Loading player points…</p>
             </div>
 
-            <div class="saved-cvc">
-              <span class="cvc-chip cap">C: {{ captainOf(team) }}</span>
-              <span class="cvc-chip vice">VC: {{ viceCaptainOf(team) }}</span>
-            </div>
+            <ng-container *ngIf="!isTeamDetailLoading(team.teamId) && teamDetailFor(team.teamId) as detail">
+              <div class="saved-header">
+                <span class="saved-id">{{ detail.teamId }}</span>
+              </div>
 
-            <div class="saved-player" *ngFor="let p of team.players">
-              <span class="sp-num">{{ p.number }}</span>
-              <span class="sp-name">{{ p.playerName }}</span>
-              <span class="sp-pos">{{ p.pos }}</span>
-              <span *ngIf="p.captain" class="sp-badge cap">C</span>
-              <span *ngIf="p.viceCaptain" class="sp-badge vice">VC</span>
+              <div class="saved-cvc">
+                <span class="cvc-chip cap">C: {{ captainOf(detail) }}</span>
+                <span class="cvc-chip vice">VC: {{ viceCaptainOf(detail) }}</span>
+              </div>
+
+              <div class="saved-player" *ngFor="let p of detail.players">
+                <span class="sp-num">{{ p.number }}</span>
+                <span class="sp-name">{{ p.playerName }}</span>
+                <span class="sp-pos">{{ p.pos }}</span>
+                <span *ngIf="p.captain" class="sp-badge cap">C</span>
+                <span *ngIf="p.viceCaptain" class="sp-badge vice">VC</span>
+                <span class="sp-points">{{ p.totalPoints }} pts</span>
+              </div>
+            </ng-container>
+
+            <div *ngIf="!isTeamDetailLoading(team.teamId) && !teamDetailFor(team.teamId)" class="lineup-message">
+              Could not load player points for this team.
             </div>
           </div>
 
