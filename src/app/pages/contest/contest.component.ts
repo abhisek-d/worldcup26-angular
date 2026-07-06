@@ -44,6 +44,10 @@ export class ContestComponent implements OnInit {
   savedTeamsError = '';
   expandedSavedTeamId: string | null = null;
 
+  // ── View-team gate (details hidden until match starts) ──
+  detailStatusLoading: string | null = null;   // teamId whose status is being checked
+  detailBlockedTeamId: string | null = null;    // teamId that was blocked (match not started)
+
   // ── Per-team score state (keyed by teamId) ──
   teamScores = new Map<string, number>();
   teamScoreLoading = new Set<string>();
@@ -78,6 +82,8 @@ export class ContestComponent implements OnInit {
     this.savedTeamsFixtureId = null;
     this.savedTeams = [];
     this.expandedSavedTeamId = null;
+    this.detailStatusLoading = null;
+    this.detailBlockedTeamId = null;
     this.teamScores.clear();
     this.teamScoreLoading.clear();
     this.teamScoreError.clear();
@@ -245,6 +251,8 @@ export class ContestComponent implements OnInit {
       this.savedTeamsFixtureId = null;
       this.savedTeams = [];
       this.expandedSavedTeamId = null;
+      this.detailStatusLoading = null;
+      this.detailBlockedTeamId = null;
       this.teamScores.clear();
       this.teamScoreLoading.clear();
       this.teamScoreError.clear();
@@ -255,6 +263,8 @@ export class ContestComponent implements OnInit {
     this.savedTeams = [];
     this.savedTeamsError = '';
     this.expandedSavedTeamId = null;
+    this.detailStatusLoading = null;
+    this.detailBlockedTeamId = null;
     this.savedTeamsLoading = true;
     this.teamScores.clear();
     this.teamScoreLoading.clear();
@@ -280,10 +290,51 @@ export class ContestComponent implements OnInit {
     });
   }
 
+  // clicking the ▼ arrow: check match status first, only reveal once the match has started
   toggleSavedTeamDetail(teamId: string): void {
-    this.expandedSavedTeamId = this.expandedSavedTeamId === teamId ? null : teamId;
+    // if already open, just close it
+    if (this.expandedSavedTeamId === teamId) {
+      this.expandedSavedTeamId = null;
+      this.detailBlockedTeamId = null;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const fixtureId = this.savedTeamsFixtureId;
+    if (fixtureId == null) {
+      return;
+    }
+
+    // check match status before revealing the team
+    this.detailStatusLoading = teamId;
+    this.detailBlockedTeamId = null;
+    this.expandedSavedTeamId = null;
     this.cdr.detectChanges();
+
+    this.wc.getFixtureStatus(fixtureId).subscribe({
+      next: (data: any) => {
+        const shortStatus = data?.response?.[0]?.fixture?.status?.short ?? '';
+        this.detailStatusLoading = null;
+
+        // NOT started → hide the team; only reveal once the match has begun/finished
+        if (this.JOINABLE_STATUSES.includes(shortStatus)) {
+          this.detailBlockedTeamId = teamId;
+        } else {
+          this.expandedSavedTeamId = teamId;
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        // on error, fail safe: keep it hidden and mark blocked
+        this.detailStatusLoading = null;
+        this.detailBlockedTeamId = teamId;
+        this.cdr.detectChanges();
+      }
+    });
   }
+
+  isDetailLoading(teamId: string): boolean { return this.detailStatusLoading === teamId; }
+  isDetailBlocked(teamId: string): boolean { return this.detailBlockedTeamId === teamId; }
 
   // ── Per-team total points ──
   fetchTeamScore(teamId: string, matchId: number): void {
@@ -512,4 +563,54 @@ export class ContestComponent implements OnInit {
     return '';
   }
 
+  // ── Edit team (email-verified) ──
+  editModalTeam: any = null;      // the team block being edited (null = modal closed)
+  editEmailInput = '';
+  editError = '';
+
+  // open the email-verification modal for a team block
+  openEditModal(team: any, event: MouseEvent): void {
+    event.stopPropagation();       // don't toggle the block open/closed
+    this.editModalTeam = team;
+    this.editEmailInput = '';
+    this.editError = '';
+    this.cdr.detectChanges();
+  }
+
+  closeEditModal(): void {
+    this.editModalTeam = null;
+    this.editEmailInput = '';
+    this.editError = '';
+    this.cdr.detectChanges();
+  }
+
+  // verify typed email against the team's stored email, then proceed to edit
+  confirmEdit(): void {
+    this.editError = '';
+
+    const typed = this.editEmailInput.trim().toLowerCase();
+    if (!typed) {
+      this.editError = 'Please enter your email.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const stored = (this.editModalTeam?.email ?? '').trim().toLowerCase();
+    if (typed !== stored) {
+      this.editError = 'You can not edit this team. Email does not match.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    // email verified — proceed to edit
+    const team = this.editModalTeam;
+    this.closeEditModal();
+    this.startEdit(team);
+  }
+
+  // what happens after successful verification (re-pick players)
+  private startEdit(team: any): void {
+    // TODO: route into edit flow — see note below
+    alert(`Verified! Editing "${team.teamName}" (id ${team.teamId}) — edit flow goes here.`);
+  }
 }

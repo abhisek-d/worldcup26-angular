@@ -266,7 +266,7 @@
       <div *ngIf="!savedTeamsLoading && savedTeams.length > 0" class="saved-blocks">
         <div *ngFor="let team of sortedSavedTeams()" class="saved-block-wrapper">
 
-          <!-- Team name block + total points box -->
+          <!-- Team name block (rank + name + edit) + total points box -->
           <div class="team-block-row">
             <button class="team-block"
                     [class.open]="expandedSavedTeamId === team.teamId"
@@ -277,6 +277,14 @@
                   {{ rankLabel(r) }}
                 </span>
                 <span class="tb-name">{{ team.teamName }}</span>
+                <span class="edit-icon" (click)="openEditModal(team, $event)" title="Edit team" role="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                  </svg>
+                </span>
               </span>
               <span class="tb-arrow">{{ expandedSavedTeamId === team.teamId ? '▲' : '▼' }}</span>
             </button>
@@ -297,11 +305,21 @@
             </button>
           </div>
 
+          <!-- Checking status -->
+          <div *ngIf="isDetailLoading(team.teamId)" class="team-detail team-detail-state">
+            <div class="spinner small"></div>
+            <p>Checking match status…</p>
+          </div>
+
+          <!-- Blocked: match not started -->
+          <div *ngIf="isDetailBlocked(team.teamId)" class="team-detail team-detail-blocked">
+            🔒 This team is hidden until the match starts.
+          </div>
+
           <!-- Expanded squad for this team -->
           <div *ngIf="expandedSavedTeamId === team.teamId" class="team-detail">
             <div class="saved-header">
-              <div class="saved-email">{{ team.email }}</div>
-              <span class="saved-id">{{ team.teamId }}</span>
+              <span class="saved-id">{{ team.teamNAme }}</span>
             </div>
 
             <div class="saved-cvc">
@@ -324,4 +342,29 @@
     </div>
 
   </div>
+
+  <!-- Edit email-verification modal -->
+  <div *ngIf="editModalTeam" class="edit-modal-backdrop" (click)="closeEditModal()">
+    <div class="edit-modal" (click)="$event.stopPropagation()">
+      <div class="em-title">Edit “{{ editModalTeam.teamName }}”</div>
+      <div class="em-sub">Enter the email used to create this team to verify it's yours.</div>
+
+      <div class="em-field">
+        <label for="editEmail">Email ID</label>
+        <input id="editEmail"
+               type="email"
+               [(ngModel)]="editEmailInput"
+               placeholder="you@example.com"
+               (keyup.enter)="confirmEdit()" />
+      </div>
+
+      <div *ngIf="editError" class="em-error">{{ editError }}</div>
+
+      <div class="em-actions">
+        <button class="em-cancel" (click)="closeEditModal()">Cancel</button>
+        <button class="em-confirm" (click)="confirmEdit()">Verify &amp; Edit</button>
+      </div>
+    </div>
+  </div>
+
 </ng-container>
