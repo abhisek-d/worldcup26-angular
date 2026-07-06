@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { WorldcupService } from '../../services/worldcup.service';
 import { Router } from '@angular/router';
 import { TeamSelectionService } from '../../services/team-selection.service';
+import { EditTeamComponent } from '../edit-team/edit-team.component';
 
 @Component({
   selector: 'app-contest',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EditTeamComponent],
   templateUrl: './contest.component.html',
   styleUrl: './contest.component.scss'
 })
@@ -55,6 +56,10 @@ export class ContestComponent implements OnInit {
 
   // ── Player meta (photo + rating) from /players season squad, display only ──
   playerMeta = new Map<number, { photo: string; rating: string | null }>();
+
+  // enriched team detail (with per-player totalPoints) from /team-by-email
+  teamDetailData = new Map<string, any>();
+  teamDetailLoading = new Set<string>();
 
   // statuses that allow joining (match not started)
   private readonly JOINABLE_STATUSES = ['NS', 'TBD'];
@@ -322,22 +327,55 @@ export class ContestComponent implements OnInit {
         const shortStatus = data?.response?.[0]?.fixture?.status?.short ?? '';
         this.detailStatusLoading = null;
 
-        // NOT started → hide the team; only reveal once the match has begun/finished
         if (this.JOINABLE_STATUSES.includes(shortStatus)) {
           this.detailBlockedTeamId = teamId;
-        } else {
-          this.expandedSavedTeamId = teamId;
+          this.cdr.detectChanges();
+          return;
         }
+
+        // match started/finished — reveal, then fetch enriched player data
+        this.expandedSavedTeamId = teamId;
         this.cdr.detectChanges();
+        this.fetchTeamDetailByEmail(teamId, fixtureId);
       },
       error: () => {
-        // on error, fail safe: keep it hidden and mark blocked
         this.detailStatusLoading = null;
         this.detailBlockedTeamId = teamId;
         this.cdr.detectChanges();
       }
     });
   }
+
+  // fetch enriched per-player points via /team-by-email, using the team's stored email
+  private fetchTeamDetailByEmail(teamId: string, matchId: number): void {
+    if (this.teamDetailData.has(teamId) || this.teamDetailLoading.has(teamId)) {
+      return; // already loaded or in flight
+    }
+
+    const team = this.savedTeams.find(t => t.teamId === teamId);
+    const email = team?.email;
+    if (!email) {
+      return;
+    }
+
+    this.teamDetailLoading.add(teamId);
+    this.cdr.detectChanges();
+
+    this.wc.getTeamByEmail(matchId, email).subscribe({
+      next: (res: any) => {
+        this.teamDetailData.set(teamId, res);
+        this.teamDetailLoading.delete(teamId);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.teamDetailLoading.delete(teamId);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  isTeamDetailLoading(teamId: string): boolean { return this.teamDetailLoading.has(teamId); }
+  teamDetailFor(teamId: string): any { return this.teamDetailData.get(teamId) ?? null; }
 
   isDetailLoading(teamId: string): boolean { return this.detailStatusLoading === teamId; }
   isDetailBlocked(teamId: string): boolean { return this.detailBlockedTeamId === teamId; }
@@ -569,54 +607,49 @@ export class ContestComponent implements OnInit {
     return '';
   }
 
-  // ── Edit team (email-verified) ──
-  editModalTeam: any = null;      // the team block being edited (null = modal closed)
-  editEmailInput = '';
-  editError = '';
+  // ── Edit team (launches EditTeamComponent modal) ──
+  editingTeam: { teamId: string; teamName: string; matchId: number } | null = null;
+  editBlockedMsg = '';
 
-  // open the email-verification modal for a team block
-  openEditModal(team: any, event: MouseEvent): void {
+  openEditModal(team: any, matchId: number, event: MouseEvent): void {
     event.stopPropagation();       // don't toggle the block open/closed
-    this.editModalTeam = team;
-    this.editEmailInput = '';
-    this.editError = '';
-    this.cdr.detectChanges();
+    this.editBlockedMsg = '';
+
+    // only allow editing while the match hasn't started
+    this.wc.getFixtureStatus(matchId).subscribe({
+      next: (data: any) => {
+        const shortStatus = data?.response?.[0]?.fixture?.status?.short ?? '';
+
+        if (!this.JOINABLE_STATUSES.includes(shortStatus)) {
+          this.editBlockedMsg = 'This match has already started. Teams can no longer be edited.';
+          this.cdr.detectChanges();
+          setTimeout(() => {
+            this.editBlockedMsg = '';
+            this.cdr.detectChanges();
+          }, 4000);
+          return;
+        }
+
+        this.editingTeam = {
+          teamId: team.teamId,
+          teamName: team.teamName,
+          matchId
+        };
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.editBlockedMsg = 'Could not verify match status. Please try again.';
+        this.cdr.detectChanges();
+        setTimeout(() => {
+          this.editBlockedMsg = '';
+          this.cdr.detectChanges();
+        }, 4000);
+      }
+    });
   }
 
   closeEditModal(): void {
-    this.editModalTeam = null;
-    this.editEmailInput = '';
-    this.editError = '';
+    this.editingTeam = null;
     this.cdr.detectChanges();
-  }
-
-  // verify typed email against the team's stored email, then proceed to edit
-  confirmEdit(): void {
-    this.editError = '';
-
-    const typed = this.editEmailInput.trim().toLowerCase();
-    if (!typed) {
-      this.editError = 'Please enter your email.';
-      this.cdr.detectChanges();
-      return;
-    }
-
-    const stored = (this.editModalTeam?.email ?? '').trim().toLowerCase();
-    if (typed !== stored) {
-      this.editError = 'You can not edit this team. Email does not match.';
-      this.cdr.detectChanges();
-      return;
-    }
-
-    // email verified — proceed to edit
-    const team = this.editModalTeam;
-    this.closeEditModal();
-    this.startEdit(team);
-  }
-
-  // what happens after successful verification (re-pick players)
-  private startEdit(team: any): void {
-    // TODO: route into edit flow
-    alert(`Verified! Editing "${team.teamName}" (id ${team.teamId}) — edit flow goes here.`);
   }
 }
