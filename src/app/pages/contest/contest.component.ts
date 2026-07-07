@@ -47,6 +47,12 @@ export class ContestComponent implements OnInit {
   savedTeamsError = '';
   expandedSavedTeamId: string | null = null;
 
+  // current match status for the saved-teams panel (used to gate rank badge display)
+  savedTeamsMatchStatus: string | null = null;
+
+  // ranks only make sense once there's real score data
+  private readonly SCORED_STATUSES = ['1H', 'HT', '2H', 'ET', 'P', 'FT'];
+
   // ── View-team gate (details hidden until match starts) ──
   detailStatusLoading: string | null = null;   // teamId whose status is being checked
   detailBlockedTeamId: string | null = null;    // teamId that was blocked (match not started)
@@ -91,6 +97,7 @@ export class ContestComponent implements OnInit {
     this.selectedPlayers.clear();
     this.savedTeamsFixtureId = null;
     this.savedTeams = [];
+    this.savedTeamsMatchStatus = null;
     this.expandedSavedTeamId = null;
     this.detailStatusLoading = null;
     this.detailBlockedTeamId = null;
@@ -263,6 +270,7 @@ export class ContestComponent implements OnInit {
     if (this.savedTeamsFixtureId === fixtureId) {
       this.savedTeamsFixtureId = null;
       this.savedTeams = [];
+      this.savedTeamsMatchStatus = null;
       this.expandedSavedTeamId = null;
       this.detailStatusLoading = null;
       this.detailBlockedTeamId = null;
@@ -277,6 +285,7 @@ export class ContestComponent implements OnInit {
 
     this.savedTeamsFixtureId = fixtureId;
     this.savedTeams = [];
+    this.savedTeamsMatchStatus = null;
     this.savedTeamsError = '';
     this.expandedSavedTeamId = null;
     this.detailStatusLoading = null;
@@ -289,6 +298,15 @@ export class ContestComponent implements OnInit {
     this.teamScoreLoading.clear();
     this.teamScoreError.clear();
     this.cdr.detectChanges();
+
+    // fetch current match status (used to decide whether ranks should show)
+    this.wc.getFixtureStatus(fixtureId).subscribe({
+      next: (data: any) => {
+        this.savedTeamsMatchStatus = data?.response?.[0]?.fixture?.status?.short ?? null;
+        this.cdr.detectChanges();
+      },
+      error: () => { /* status is optional here — rank badges just stay hidden */ }
+    });
 
     this.wc.getSavedTeams(fixtureId).subscribe({
       next: (data: any) => {
@@ -422,6 +440,12 @@ export class ContestComponent implements OnInit {
 
   isDetailLoading(teamId: string): boolean { return this.detailStatusLoading === teamId; }
   isDetailBlocked(teamId: string): boolean { return this.detailBlockedTeamId === teamId; }
+
+  // ranks are only meaningful once the match has live/final stats
+  showRanks(): boolean {
+    return this.savedTeamsMatchStatus !== null
+      && this.SCORED_STATUSES.includes(this.savedTeamsMatchStatus);
+  }
 
   // ── Per-team total points ──
   fetchTeamScore(teamId: string, matchId: number): void {

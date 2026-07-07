@@ -272,7 +272,7 @@
                     [class.open]="expandedSavedTeamId === team.teamId"
                     (click)="toggleSavedTeamDetail(team.teamId)">
               <span class="tb-left">
-                <span *ngIf="rankOf(team.teamId) as r" class="tb-rank"
+                <span *ngIf="showRanks() && rankOf(team.teamId) as r" class="tb-rank"
                       [class.gold]="r === 1" [class.silver]="r === 2" [class.bronze]="r === 3">
                   {{ rankLabel(r) }}
                 </span>
