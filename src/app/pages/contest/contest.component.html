@@ -80,7 +80,7 @@
         <button class="saved-btn"
                 [class.active]="savedTeamsFixtureId === f.fixture.id"
                 (click)="toggleSavedTeams(f.fixture.id, $event)">
-          👥 {{ savedTeamsFixtureId === f.fixture.id ? 'Hide Teams' : 'Saved Teams' }}
+          👥 {{ savedTeamsFixtureId === f.fixture.id ? 'Hide Details' : 'Contest Detail' }}
         </button>
       </div>
 
@@ -349,6 +349,11 @@
             </div>
           </div>
 
+          <!-- Edit blocked message, shown only under the specific team clicked -->
+          <div *ngIf="editBlockedMsg && editBlockedTeamId === team.teamId" class="lineup-message edit-blocked-banner">
+            ⚠️ {{ editBlockedMsg }}
+          </div>
+
         </div>
       </div>
 
@@ -363,10 +368,5 @@
                  [matchId]="editingTeam.matchId"
                  (closed)="closeEditModal()">
   </app-edit-team>
-
-  <!-- Edit blocked (match already started) -->
-  <div *ngIf="editBlockedMsg" class="lineup-message edit-blocked-banner">
-    ⚠️ {{ editBlockedMsg }}
-  </div>
 
 </ng-container>

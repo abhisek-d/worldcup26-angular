@@ -610,10 +610,12 @@ export class ContestComponent implements OnInit {
   // ── Edit team (launches EditTeamComponent modal) ──
   editingTeam: { teamId: string; teamName: string; matchId: number } | null = null;
   editBlockedMsg = '';
+  editBlockedTeamId: string | null = null;
 
   openEditModal(team: any, matchId: number, event: MouseEvent): void {
     event.stopPropagation();       // don't toggle the block open/closed
     this.editBlockedMsg = '';
+    this.editBlockedTeamId = null;
 
     // only allow editing while the match hasn't started
     this.wc.getFixtureStatus(matchId).subscribe({
@@ -622,9 +624,11 @@ export class ContestComponent implements OnInit {
 
         if (!this.JOINABLE_STATUSES.includes(shortStatus)) {
           this.editBlockedMsg = 'This match has already started. Teams can no longer be edited.';
+          this.editBlockedTeamId = team.teamId;
           this.cdr.detectChanges();
           setTimeout(() => {
             this.editBlockedMsg = '';
+            this.editBlockedTeamId = null;
             this.cdr.detectChanges();
           }, 4000);
           return;
@@ -639,9 +643,11 @@ export class ContestComponent implements OnInit {
       },
       error: () => {
         this.editBlockedMsg = 'Could not verify match status. Please try again.';
+        this.editBlockedTeamId = team.teamId;
         this.cdr.detectChanges();
         setTimeout(() => {
           this.editBlockedMsg = '';
+          this.editBlockedTeamId = null;
           this.cdr.detectChanges();
         }, 4000);
       }
