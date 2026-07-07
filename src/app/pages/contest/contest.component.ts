@@ -38,6 +38,8 @@ export class ContestComponent implements OnInit {
   readonly MIN_MID = 3;
   readonly MIN_FWD = 1;
 
+  submittingTeam = false;
+
   // ── Saved teams state ──
   savedTeamsFixtureId: number | null = null;
   savedTeams: any[] = [];
@@ -512,6 +514,11 @@ export class ContestComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  // Final safety check before navigating to submit-team.
+  // IMPORTANT: this fails OPEN — if the status check itself errors (network
+  // hiccup, rate limit, etc.) we do NOT block the user. We only block when
+  // the check succeeds AND clearly shows the match has started. This avoids
+  // making submission depend on a second live API call always succeeding.
   submitTeam(): void {
     if (!this.isTeamValid()) {
       alert(this.validationMessage());
@@ -524,20 +531,37 @@ export class ContestComponent implements OnInit {
       return;
     }
 
+    if (this.submittingTeam) {
+      return; // guard against double-click while status check is in flight
+    }
+    this.submittingTeam = true;
+    this.cdr.detectChanges();
+
+    const proceed = () => {
+      this.submittingTeam = false;
+      this.teamSelection.set(Array.from(this.selectedPlayers.values()), fixtureId);
+      this.router.navigate(['/submit-team']);
+    };
+
     this.wc.getFixtureStatus(fixtureId).subscribe({
       next: (data: any) => {
         const shortStatus = data?.response?.[0]?.fixture?.status?.short ?? '';
 
-        if (!this.JOINABLE_STATUSES.includes(shortStatus)) {
+        if (shortStatus && !this.JOINABLE_STATUSES.includes(shortStatus)) {
+          this.submittingTeam = false;
+          this.cdr.detectChanges();
           alert('You can not join as match already started.');
           return;
         }
 
-        this.teamSelection.set(Array.from(this.selectedPlayers.values()), fixtureId);
-        this.router.navigate(['/submit-team']);
+        // status confirmed joinable, or status field was empty/unrecognized — proceed
+        proceed();
       },
       error: () => {
-        alert('Could not verify match status. Please try again.');
+        // could not verify status — do not block the user, just proceed.
+        // The final server-side check in submit-team.component.ts is the
+        // real backstop for this rule.
+        proceed();
       }
     });
   }
