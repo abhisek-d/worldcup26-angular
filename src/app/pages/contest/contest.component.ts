@@ -517,8 +517,29 @@ export class ContestComponent implements OnInit {
       alert(this.validationMessage());
       return;
     }
-    this.teamSelection.set(Array.from(this.selectedPlayers.values()), this.expandedFixtureId);
-    this.router.navigate(['/submit-team']);
+
+    const fixtureId = this.expandedFixtureId;
+    if (fixtureId == null) {
+      alert('Missing match id. Please go back and pick your team again.');
+      return;
+    }
+
+    this.wc.getFixtureStatus(fixtureId).subscribe({
+      next: (data: any) => {
+        const shortStatus = data?.response?.[0]?.fixture?.status?.short ?? '';
+
+        if (!this.JOINABLE_STATUSES.includes(shortStatus)) {
+          alert('You can not join as match already started.');
+          return;
+        }
+
+        this.teamSelection.set(Array.from(this.selectedPlayers.values()), fixtureId);
+        this.router.navigate(['/submit-team']);
+      },
+      error: () => {
+        alert('Could not verify match status. Please try again.');
+      }
+    });
   }
 
   sortedPlayers(players: any[]): any[] {

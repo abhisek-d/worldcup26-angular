@@ -21,6 +21,9 @@
         </div>
         <div class="preview-player" *ngFor="let p of players">
           <span class="pv-num">{{ p.number }}</span>
+          <span class="pv-pos">{{ p.pos }}</span>
+          <img *ngIf="p.photo" [src]="p.photo" [alt]="p.name"
+               class="pv-photo" onerror="this.style.visibility='hidden'" />
           <span class="pv-name">{{ p.name }}</span>
           <span class="pv-team">{{ p.teamName }}</span>
 

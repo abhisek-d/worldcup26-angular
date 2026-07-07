@@ -26,6 +26,8 @@ export class SubmitTeamComponent {
   errorMsg = '';
   savedTeamId = '';
 
+  private readonly JOINABLE_STATUSES = ['NS', 'TBD'];
+
   constructor(
     private teamSelection: TeamSelectionService,
     private router: Router,
@@ -79,6 +81,31 @@ export class SubmitTeamComponent {
       return;
     }
 
+    // final status check right before submitting — the match may have started
+    // while the user was filling out this form
+    this.submitting = true;
+    this.wc.getFixtureStatus(this.fixtureId).subscribe({
+      next: (data: any) => {
+        const shortStatus = data?.response?.[0]?.fixture?.status?.short ?? '';
+
+        if (!this.JOINABLE_STATUSES.includes(shortStatus)) {
+          this.submitting = false;
+          this.errorMsg = 'You can not join as match already started.';
+          this.cdr.detectChanges();
+          return;
+        }
+
+        this.doSubmit();
+      },
+      error: () => {
+        this.submitting = false;
+        this.errorMsg = 'Could not verify match status. Please try again.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private doSubmit(): void {
     // Build startXI in the lineup shape (11 players)
     const startXI = this.players.map(p => ({
       player: {
@@ -111,8 +138,7 @@ export class SubmitTeamComponent {
       ]
     };
 
-    this.submitting = true;
-    this.wc.createTeam(this.fixtureId, payload).subscribe({
+    this.wc.createTeam(this.fixtureId!, payload).subscribe({
       next: (res: any) => {
         console.log('create-team response:', res);
         this.submitting = false;
@@ -125,7 +151,6 @@ export class SubmitTeamComponent {
         this.cdr.detectChanges();
       },
       error: (err: any) => {
-        // Backend sends { status: 'error', message: '...' } in the 400 body (under err.error)
         const backendMsg = err?.error?.message;
         this.errorMsg = backendMsg
           ? backendMsg
