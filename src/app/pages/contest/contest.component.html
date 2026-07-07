@@ -336,11 +336,13 @@
 
               <div class="saved-player" *ngFor="let p of detail.players">
                 <span class="sp-num">{{ p.number }}</span>
+                <img *ngIf="p.photo" [src]="p.photo" [alt]="p.playerName"
+                     class="sp-photo" onerror="this.style.visibility='hidden'" />
                 <span class="sp-name">{{ p.playerName }}</span>
                 <span class="sp-pos">{{ p.pos }}</span>
                 <span *ngIf="p.captain" class="sp-badge cap">C</span>
                 <span *ngIf="p.viceCaptain" class="sp-badge vice">VC</span>
-                <span class="sp-points">{{ p.totalPoints }} pts</span>
+                <span class="sp-points">{{ finalPointsFor(team.teamId, p.playerId, p.totalPoints) }} pts</span>
               </div>
             </ng-container>
 

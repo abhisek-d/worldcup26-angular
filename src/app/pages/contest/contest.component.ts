@@ -57,9 +57,12 @@ export class ContestComponent implements OnInit {
   // ── Player meta (photo + rating) from /players season squad, display only ──
   playerMeta = new Map<number, { photo: string; rating: string | null }>();
 
-  // enriched team detail (with per-player totalPoints) from /team-by-email
+  // enriched team detail (with per-player totalPoints + photo) from /team-by-email
   teamDetailData = new Map<string, any>();
   teamDetailLoading = new Set<string>();
+
+  // per-player finalPoints (with C/VC multiplier) from /team-score, keyed by teamId -> Map<playerId, finalPoints>
+  teamFinalPoints = new Map<string, Map<number, number>>();
 
   // statuses that allow joining (match not started)
   private readonly JOINABLE_STATUSES = ['NS', 'TBD'];
@@ -89,6 +92,9 @@ export class ContestComponent implements OnInit {
     this.expandedSavedTeamId = null;
     this.detailStatusLoading = null;
     this.detailBlockedTeamId = null;
+    this.teamDetailData.clear();
+    this.teamDetailLoading.clear();
+    this.teamFinalPoints.clear();
     this.teamScores.clear();
     this.teamScoreLoading.clear();
     this.teamScoreError.clear();
@@ -258,6 +264,9 @@ export class ContestComponent implements OnInit {
       this.expandedSavedTeamId = null;
       this.detailStatusLoading = null;
       this.detailBlockedTeamId = null;
+      this.teamDetailData.clear();
+      this.teamDetailLoading.clear();
+      this.teamFinalPoints.clear();
       this.teamScores.clear();
       this.teamScoreLoading.clear();
       this.teamScoreError.clear();
@@ -270,6 +279,9 @@ export class ContestComponent implements OnInit {
     this.expandedSavedTeamId = null;
     this.detailStatusLoading = null;
     this.detailBlockedTeamId = null;
+    this.teamDetailData.clear();
+    this.teamDetailLoading.clear();
+    this.teamFinalPoints.clear();
     this.savedTeamsLoading = true;
     this.teamScores.clear();
     this.teamScoreLoading.clear();
@@ -337,6 +349,7 @@ export class ContestComponent implements OnInit {
         this.expandedSavedTeamId = teamId;
         this.cdr.detectChanges();
         this.fetchTeamDetailByEmail(teamId, fixtureId);
+        this.fetchTeamFinalPoints(teamId, fixtureId);
       },
       error: () => {
         this.detailStatusLoading = null;
@@ -372,6 +385,34 @@ export class ContestComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  // fetch per-player finalPoints (captain/vice multiplier applied) via /team-score
+  private fetchTeamFinalPoints(teamId: string, matchId: number): void {
+    if (this.teamFinalPoints.has(teamId)) {
+      return; // already loaded
+    }
+
+    this.wc.getTeamScore(teamId, matchId).subscribe({
+      next: (res: any) => {
+        const map = new Map<number, number>();
+        (res?.players ?? []).forEach((p: any) => {
+          map.set(p.playerId, p.finalPoints);
+        });
+        this.teamFinalPoints.set(teamId, map);
+        this.cdr.detectChanges();
+      },
+      error: () => { /* fall back silently — row shows totalPoints if this fails */ }
+    });
+  }
+
+  // look up a player's finalPoints for the given team, falling back to their totalPoints
+  finalPointsFor(teamId: string, playerId: number, fallback: number): number {
+    const perTeam = this.teamFinalPoints.get(teamId);
+    if (!perTeam || !perTeam.has(playerId)) {
+      return fallback;
+    }
+    return perTeam.get(playerId)!;
   }
 
   isTeamDetailLoading(teamId: string): boolean { return this.teamDetailLoading.has(teamId); }
